@@ -1,0 +1,137 @@
+name: Build asusctl Bottles
+on:
+  repository_dispatch:
+    types: [build-asusctl-bottle]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build'
+        required: true
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-24.04
+    outputs:
+      version: ${{ steps.set-version.outputs.version || github.event.inputs.version }}
+      branch: ${{ steps.set-branch.outputs.branch }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set version output
+        id: set-version
+        run: |
+          VERSION="${{ github.event.client_payload.version || github.event.inputs.version }}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Set branch output
+        id: set-branch
+        run: |
+          BRANCH="asusctl-${{ steps.set-version.outputs.version }}"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+
+      - name: Update formula version and SHA
+        run: |
+          VERSION="${{ steps.set-version.outputs.version }}"
+          URL="https://gitlab.com/asus-linux/asusctl/-/archive/${VERSION}/asusctl-${VERSION}.tar.gz"
+          SHA256=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
+
+          # Update Formula/asusctl.rb
+          sed -i "s|url \".*\"|url \"${URL}\"|" Formula/asusctl.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" Formula/asusctl.rb
+          
+      - name: Create PR for formula update
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ steps.set-branch.outputs.branch }}
+          title: "Update asusctl to ${{ steps.set-version.outputs.version }}"
+          commit-message: "chore: update asusctl to ${{ steps.set-version.outputs.version }}"
+
+  build-bottles:
+    needs: update-formula
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Homebrew and build bottle
+        run: |
+          VERSION="${{ needs.update-formula.outputs.version }}"
+
+          # Create a temporary directory for the tap files
+          mkdir -p /tmp/homebrew-tap
+
+          # Copy tap files to the temporary directory
+          cp -r . /tmp/homebrew-tap/
+
+          # Run Homebrew operations in the container with proper volume mounts
+          docker run --rm \
+            -v "/tmp/homebrew-tap:/tmp/homebrew-tap" \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            homebrew/ubuntu24.04:latest \
+            bash -c "
+              brew update-reset
+
+              # Copy the tap to Homebrew's directory
+              mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/agammemnon
+              cp -r /tmp/homebrew-tap /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/agammemnon/homebrew-tap
+
+              # Install and bottle
+              brew install --build-bottle 'agammemnon/tap/asusctl'
+
+              # Change to writable directory for bottling
+              cd /tmp
+              brew bottle --json --root-url='https://github.com/${{ github.repository }}/releases/download/asusctl-${VERSION}' 'agammemnon/tap/asusctl'
+
+              # Make workspace writable and copy bottles
+              sudo chown -R \$(whoami) /workspace
+              cp *.bottle.* /workspace/
+            "
+          
+      - name: Upload bottle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bottle
+          path: '*.bottle.*'
+
+  upload-bottles:
+    needs: [update-formula, build-bottles]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.update-formula.outputs.branch }}
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download all bottles
+        uses: actions/download-artifact@v4
+        with:
+          name: bottle
+          path: .
+        
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: asusctl-${{ needs.update-formula.outputs.version }}
+          name: "asusctl ${{ needs.update-formula.outputs.version }} bottles"
+          files: '*.bottle.*'
+          
+      - name: Update formula with bottle SHAs
+        run: |
+          brew bottle --merge --write --no-commit ./*.bottle.json
+
+      - name: Set up git branch
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git push --set-upstream origin ${{ needs.update-formula.outputs.branch }}
+
+      - name: Commit bottle updates
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'chore: add asusctl bottles for ${{ needs.update-formula.outputs.version }}'

@@ -64,15 +64,32 @@ class Foundry < Formula
       system "meson", "..", *args
       system "meson", "compile", "--verbose"
       system "meson", "install"
+      # Remove compiled schema file to avoid linking conflicts
+      rm_f "#{share}/glib-2.0/schemas/gschemas.compiled"
     end
-    
-    # Remove the compiled schemas file - it will be regenerated in post_install
-    (share/"glib-2.0/schemas/gschemas.compiled").unlink if (share/"glib-2.0/schemas/gschemas.compiled").exist?
-    
+
     # Fix lib64 issue if it still occurs
     if (prefix/"lib64").exist? && !(prefix/"lib").exist?
       ln_s "lib64", prefix/"lib"
     end
+  end
+
+  def caveats
+    <<~EOS
+      To complete foundry setup:
+
+      1. Set the schema directory:
+         export GSETTINGS_SCHEMA_DIR=#{opt_prefix}/share/glib-2.0/schemas:$GSETTINGS_SCHEMA_DIR
+
+      2. Compile the schemas:
+         glib-compile-schemas #{opt_prefix}/share/glib-2.0/schemas
+
+      3. Add the export to your shell profile to make it permanent:
+         echo 'export GSETTINGS_SCHEMA_DIR=#{opt_prefix}/share/glib-2.0/schemas:$GSETTINGS_SCHEMA_DIR' >> ~/.bashrc
+         # or ~/.zshrc if using zsh
+
+      After setup, foundry will be ready to use in your development projects.
+    EOS
   end
 
   test do

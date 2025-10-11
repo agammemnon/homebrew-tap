@@ -128,6 +128,8 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.determine-config.outputs.branch }}
 
       - name: Set up Homebrew and build bottle
         run: |
@@ -203,12 +205,6 @@ jobs:
       - name: Update formula with bottle SHAs
         run: |
           brew bottle --merge --write --no-commit ./*.bottle.json
-
-      - name: Set up git branch
-        run: |
-          git config --global user.email "action@github.com"
-          git config --global user.name "GitHub Action"
-          git push --set-upstream origin ${{ needs.determine-config.outputs.branch }}
 
       - name: Commit bottle updates
         uses: EndBug/add-and-commit@v9

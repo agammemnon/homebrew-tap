@@ -4,6 +4,11 @@ class Foundry < Formula
   url "https://gitlab.gnome.org/GNOME/foundry.git", tag: "1.0.0", revision: "0e75785db3b9d0ca503875aa9d925f20f9dd2194"
   license "LGPL-2.1-or-later"
 
+  bottle do
+    root_url "https://github.com/agammemnon/homebrew-tap/releases/download/foundry-1.0.0"
+    sha256 x86_64_linux: "ada0f60b848914cd9bc2cc1f0d754832a921c23ea39672b798ef3c7b7b7ba96b"
+  end
+
   depends_on "cmake" => :build
   depends_on "gettext" => :build
   depends_on "gobject-introspection" => :build

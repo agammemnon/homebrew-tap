@@ -206,7 +206,14 @@ jobs:
         run: |
           brew bottle --merge --write --no-commit ./*.bottle.json
 
+      - name: Ensure on correct branch
+        run: |
+          git checkout ${{ needs.determine-config.outputs.branch }}
+          git status
+
       - name: Commit bottle updates
         uses: EndBug/add-and-commit@v9
         with:
           message: 'chore: add ${{ needs.determine-config.outputs.formula }} bottles for ${{ needs.determine-config.outputs.version }}'
+          new_branch: ${{ needs.determine-config.outputs.branch }}
+          push: true

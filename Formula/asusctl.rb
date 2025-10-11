@@ -1,7 +1,7 @@
 class Asusctl < Formula
   desc "Control daemon, CLI tools for interacting with ASUS ROG laptops"
   homepage "https://gitlab.com/asus-linux/asusctl"
-  url "https://gitlab.com/asus-linux/asusctl.git", tag: "6.1.14", revision: "f5e2484797d5046f74af2a46651d45d4fd652979"
+  url "https://gitlab.com/asus-linux/asusctl.git", tag: "6.1.12", revision: "685345d6567bc366e93bbc3d7321f9d9a719a7ed"
   license "MPL-2.0"
 
   livecheck do

@@ -1,13 +1,8 @@
 class Foundry < Formula
   desc "Command-line tool for building and managing IDE-like development environments"
   homepage "https://gitlab.gnome.org/GNOME/foundry"
-  url "https://gitlab.gnome.org/GNOME/foundry.git", tag: "1.0.0", revision: "0e75785db3b9d0ca503875aa9d925f20f9dd2194"
+  url "https://gitlab.gnome.org/GNOME/foundry.git", tag: "1.0.0", revision: "7a846cb896d5a405b68a86f6ae0a469e3f07057f"
   license "LGPL-2.1-or-later"
-
-  bottle do
-    root_url "https://github.com/agammemnon/homebrew-tap/releases/download/foundry-1.0.0"
-    sha256 x86_64_linux: "ada0f60b848914cd9bc2cc1f0d754832a921c23ea39672b798ef3c7b7b7ba96b"
-  end
 
   depends_on "cmake" => :build
   depends_on "gettext" => :build

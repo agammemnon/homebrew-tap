@@ -123,6 +123,21 @@ jobs:
           title: "Update ${{ needs.determine-config.outputs.formula }} to ${{ needs.determine-config.outputs.version }}"
           commit-message: "chore: update ${{ needs.determine-config.outputs.formula }} to ${{ needs.determine-config.outputs.version }}"
 
+      - name: Wait for branch to be available
+        run: |
+          BRANCH="${{ needs.determine-config.outputs.branch }}"
+          echo "Waiting for branch $BRANCH to be available..."
+          for i in {1..30}; do
+            if git ls-remote --heads origin "$BRANCH" | grep -q "$BRANCH"; then
+              echo "Branch $BRANCH is now available"
+              exit 0
+            fi
+            echo "Attempt $i: Branch not yet available, waiting..."
+            sleep 2
+          done
+          echo "Error: Branch $BRANCH did not become available"
+          exit 1
+
   build-bottles:
     needs: [determine-config, update-formula]
     runs-on: ubuntu-24.04

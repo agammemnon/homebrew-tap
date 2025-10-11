@@ -3,31 +3,43 @@ on:
   workflow_dispatch:
 
 jobs:
-  check-asusctl:
+  check-releases:
     runs-on: ubuntu-24.04
-    outputs:
-      new_version: ${{ steps.check.outputs.asusctl_latest }}
-      needs_update: ${{ steps.check.outputs.asusctl_needs_update }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - formula: asusctl
+            project: asus-linux/asusctl
+            gitlab_host: gitlab.com
+            event_type: build-asusctl-bottle
+          - formula: foundry
+            project: GNOME/foundry
+            gitlab_host: gitlab.gnome.org
+            event_type: build-foundry-bottle
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      
+
       - name: Install dependencies
         run: |
           pip install requests
-      
+
       - name: Check GitLab releases
         id: check
         run: |
-          python3 .github/scripts/check_gitlab_release.py
-      
+          python3 .github/scripts/check_gitlab_release.py \
+            --formula ${{ matrix.formula }} \
+            --project ${{ matrix.project }} \
+            --gitlab-host ${{ matrix.gitlab_host }}
+
       - name: Trigger bottle build if new
-        if: steps.check.outputs.asusctl_needs_update == 'true'
+        if: steps.check.outputs.needs_update == 'true'
         uses: peter-evans/repository-dispatch@v3
         with:
-          event-type: build-asusctl-bottle
-          client-payload: '{"version": "${{ steps.check.outputs.asusctl_latest }}"}'
+          event-type: ${{ matrix.event_type }}
+          client-payload: '{"version": "${{ steps.check.outputs.latest_version }}"}'

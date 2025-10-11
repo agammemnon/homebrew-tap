@@ -1,0 +1,216 @@
+name: Build Bottles
+on:
+  repository_dispatch:
+    types: [build-asusctl-bottle, build-foundry-bottle]
+  workflow_dispatch:
+    inputs:
+      formula:
+        description: 'Formula to build'
+        required: true
+        type: choice
+        options:
+          - asusctl
+          - foundry
+      version:
+        description: 'Version to build'
+        required: true
+
+jobs:
+  determine-config:
+    runs-on: ubuntu-24.04
+    outputs:
+      formula: ${{ steps.config.outputs.formula }}
+      version: ${{ steps.config.outputs.version }}
+      source_type: ${{ steps.config.outputs.source_type }}
+      gitlab_host: ${{ steps.config.outputs.gitlab_host }}
+      gitlab_project: ${{ steps.config.outputs.gitlab_project }}
+      git_url: ${{ steps.config.outputs.git_url }}
+      tarball_url_template: ${{ steps.config.outputs.tarball_url_template }}
+      branch: ${{ steps.config.outputs.branch }}
+    steps:
+      - name: Set configuration based on formula
+        id: config
+        run: |
+          # Determine formula from event type or manual input
+          if [ "${{ github.event.action }}" = "build-asusctl-bottle" ]; then
+            FORMULA="asusctl"
+            VERSION="${{ github.event.client_payload.version }}"
+          elif [ "${{ github.event.action }}" = "build-foundry-bottle" ]; then
+            FORMULA="foundry"
+            VERSION="${{ github.event.client_payload.version }}"
+          else
+            FORMULA="${{ github.event.inputs.formula }}"
+            VERSION="${{ github.event.inputs.version }}"
+          fi
+
+          # Set formula-specific configuration
+          case "$FORMULA" in
+            asusctl)
+              echo "formula=asusctl" >> "$GITHUB_OUTPUT"
+              echo "source_type=git" >> "$GITHUB_OUTPUT"
+              echo "gitlab_host=gitlab.com" >> "$GITHUB_OUTPUT"
+              echo "gitlab_project=asus-linux/asusctl" >> "$GITHUB_OUTPUT"
+              echo "git_url=https://gitlab.com/asus-linux/asusctl.git" >> "$GITHUB_OUTPUT"
+              ;;
+            foundry)
+              echo "formula=foundry" >> "$GITHUB_OUTPUT"
+              echo "source_type=git" >> "$GITHUB_OUTPUT"
+              echo "gitlab_host=gitlab.gnome.org" >> "$GITHUB_OUTPUT"
+              echo "gitlab_project=GNOME/foundry" >> "$GITHUB_OUTPUT"
+              echo "git_url=https://gitlab.gnome.org/GNOME/foundry.git" >> "$GITHUB_OUTPUT"
+              ;;
+            *)
+              echo "Unknown formula: $FORMULA" >&2
+              exit 1
+              ;;
+          esac
+
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "branch=${FORMULA}-${VERSION}" >> "$GITHUB_OUTPUT"
+
+  update-formula:
+    needs: determine-config
+    runs-on: ubuntu-24.04
+    outputs:
+      revision: ${{ steps.fetch-revision.outputs.revision }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update tarball-based formula
+        if: needs.determine-config.outputs.source_type == 'tarball'
+        run: |
+          VERSION="${{ needs.determine-config.outputs.version }}"
+          FORMULA="${{ needs.determine-config.outputs.formula }}"
+          URL_TEMPLATE="${{ needs.determine-config.outputs.tarball_url_template }}"
+          URL="${URL_TEMPLATE/\{version\}/${VERSION}}"
+
+          SHA256=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
+
+          # Update Formula file
+          sed -i "s|url \".*\"|url \"${URL}\"|" "Formula/${FORMULA}.rb"
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA256}\"|" "Formula/${FORMULA}.rb"
+
+      - name: Fetch git revision for tag
+        if: needs.determine-config.outputs.source_type == 'git'
+        id: fetch-revision
+        run: |
+          VERSION="${{ needs.determine-config.outputs.version }}"
+          GIT_URL="${{ needs.determine-config.outputs.git_url }}"
+
+          REVISION=$(git ls-remote "$GIT_URL" "refs/tags/${VERSION}" | cut -f1)
+          if [ -z "$REVISION" ]; then
+            echo "Error: Could not find revision for tag ${VERSION}" >&2
+            exit 1
+          fi
+          echo "revision=${REVISION}" >> "$GITHUB_OUTPUT"
+          echo "Found revision: ${REVISION}"
+
+      - name: Update git-based formula
+        if: needs.determine-config.outputs.source_type == 'git'
+        run: |
+          VERSION="${{ needs.determine-config.outputs.version }}"
+          FORMULA="${{ needs.determine-config.outputs.formula }}"
+          REVISION="${{ steps.fetch-revision.outputs.revision }}"
+
+          # Update Formula file with new tag and revision
+          sed -i "s|tag: \"[^\"]*\"|tag: \"${VERSION}\"|" "Formula/${FORMULA}.rb"
+          sed -i "s|revision: \"[^\"]*\"|revision: \"${REVISION}\"|" "Formula/${FORMULA}.rb"
+
+      - name: Create PR for formula update
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: ${{ needs.determine-config.outputs.branch }}
+          title: "Update ${{ needs.determine-config.outputs.formula }} to ${{ needs.determine-config.outputs.version }}"
+          commit-message: "chore: update ${{ needs.determine-config.outputs.formula }} to ${{ needs.determine-config.outputs.version }}"
+
+  build-bottles:
+    needs: [determine-config, update-formula]
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Homebrew and build bottle
+        run: |
+          VERSION="${{ needs.determine-config.outputs.version }}"
+          FORMULA="${{ needs.determine-config.outputs.formula }}"
+
+          # Create a temporary directory for the tap files
+          mkdir -p /tmp/homebrew-tap
+
+          # Copy tap files to the temporary directory
+          cp -r . /tmp/homebrew-tap/
+
+          # Run Homebrew operations in the container with proper volume mounts
+          docker run --rm \
+            -v "/tmp/homebrew-tap:/tmp/homebrew-tap" \
+            -v "${{ github.workspace }}:/workspace" \
+            -w /workspace \
+            homebrew/ubuntu24.04:latest \
+            bash -c "
+              brew update-reset
+
+              # Copy the tap to Homebrew's directory
+              mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/agammemnon
+              cp -r /tmp/homebrew-tap /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/agammemnon/homebrew-tap
+
+              # Install and bottle
+              brew install --build-bottle \"agammemnon/tap/${FORMULA}\"
+
+              # Change to writable directory for bottling
+              cd /tmp
+              brew bottle --json --root-url=\"https://github.com/${{ github.repository }}/releases/download/${FORMULA}-${VERSION}\" \"agammemnon/tap/${FORMULA}\"
+
+              # Make workspace writable and copy bottles
+              sudo chown -R \$(whoami) /workspace
+              cp *.bottle.* /workspace/
+            "
+
+      - name: Upload bottle artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bottle
+          path: '*.bottle.*'
+
+  upload-bottles:
+    needs: [determine-config, update-formula, build-bottles]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.determine-config.outputs.branch }}
+
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Download all bottles
+        uses: actions/download-artifact@v4
+        with:
+          name: bottle
+          path: .
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ needs.determine-config.outputs.formula }}-${{ needs.determine-config.outputs.version }}
+          name: "${{ needs.determine-config.outputs.formula }} ${{ needs.determine-config.outputs.version }} bottles"
+          files: '*.bottle.*'
+
+      - name: Update formula with bottle SHAs
+        run: |
+          brew bottle --merge --write --no-commit ./*.bottle.json
+
+      - name: Set up git branch
+        run: |
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+          git push --set-upstream origin ${{ needs.determine-config.outputs.branch }}
+
+      - name: Commit bottle updates
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: 'chore: add ${{ needs.determine-config.outputs.formula }} bottles for ${{ needs.determine-config.outputs.version }}'

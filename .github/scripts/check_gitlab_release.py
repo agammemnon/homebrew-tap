@@ -14,16 +14,20 @@ class GitLabReleaseChecker:
     """Check for new GitLab releases and compare with formula version"""
 
     def __init__(
-        self, project_path: str = "asus-linux/asusctl", formula_name: str = "asusctl"
+        self,
+        project_path: str = "asus-linux/asusctl",
+        formula_name: str = "asusctl",
+        gitlab_host: str = "gitlab.com",
     ):
         self.project_path = project_path
         self.formula_name = formula_name
+        self.gitlab_host = gitlab_host
         self.gitlab_token = os.environ.get("GITLAB_TOKEN")
 
     def fetch_latest_release(self) -> Optional[str]:
         """Fetch the latest release tag from GitLab API"""
 
-        url = f"https://gitlab.com/api/v4/projects/{self.project_path.replace('/', '%2F')}/releases/permalink/latest"
+        url = f"https://{self.gitlab_host}/api/v4/projects/{self.project_path.replace('/', '%2F')}/releases/permalink/latest"
         headers = {}
 
         if self.gitlab_token:
@@ -55,8 +59,12 @@ class GitLabReleaseChecker:
 
         content = path.read_text(encoding="utf-8")
 
+        # Patterns to extract version from different formula URL formats
+        # 1. Tarball archives: url "https://host/project/-/archive/1.2.3/project-1.2.3.tar.gz"
+        # 2. Explicit version: version "1.2.3"
+        # 3. Git tags: tag: "1.2.3" or tag: "v1.2.3"
         patterns = [
-            r"url.*\/archive\/v?([^\/]+)\/asusctl-",
+            r'url\s+"[^"]*\/archive\/v?([^\/\"]+)\/',
             r'version\s+"([^"]+)"',
             r'tag:\s+"v?([^"]+)"',
         ]
@@ -163,10 +171,17 @@ def main():
     parser.add_argument(
         "--project", default="asus-linux/asusctl", help="GitLab project path"
     )
+    parser.add_argument(
+        "--gitlab-host", default="gitlab.com", help="GitLab host (e.g., gitlab.com, gitlab.gnome.org)"
+    )
 
     args = parser.parse_args()
 
-    checker = GitLabReleaseChecker(project_path=args.project, formula_name=args.formula)
+    checker = GitLabReleaseChecker(
+        project_path=args.project,
+        formula_name=args.formula,
+        gitlab_host=args.gitlab_host,
+    )
     sys.exit(checker.run())
 
 

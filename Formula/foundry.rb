@@ -4,27 +4,27 @@ class Foundry < Formula
   url "https://gitlab.gnome.org/GNOME/foundry.git", tag: "1.0.0", revision: "7a846cb896d5a405b68a86f6ae0a469e3f07057f"
   license "LGPL-2.1-or-later"
 
+  depends_on "cmake" => :build
+  depends_on "gettext" => :build
+  depends_on "gobject-introspection" => :build
   depends_on "meson" => :build
   depends_on "ninja" => :build
   depends_on "pkgconf" => :build
-  depends_on "gobject-introspection" => :build
-  depends_on "cmake" => :build
-  depends_on "gettext" => :build
-  depends_on "glib"
-  depends_on "libdex"
-  depends_on "json-glib"
-  depends_on "libpeas"
-  depends_on "template-glib"
-  depends_on "libsoup"
-  depends_on "gom"
-  depends_on "libadwaita"
-  depends_on "libpanel"
-  depends_on "sysprof"
-  depends_on "libgit2"
-  depends_on "editorconfig"
-  depends_on "libxml2"
-  depends_on "universal-ctags"
   depends_on "cmark"
+  depends_on "editorconfig"
+  depends_on "glib"
+  depends_on "gom"
+  depends_on "json-glib"
+  depends_on "libadwaita"
+  depends_on "libdex"
+  depends_on "libgit2"
+  depends_on "libpanel"
+  depends_on "libpeas"
+  depends_on "libsoup"
+  depends_on "libxml2"
+  depends_on "sysprof"
+  depends_on "template-glib"
+  depends_on "universal-ctags"
 
   def install
     ENV.prepend_path "PKG_CONFIG_PATH", Formula["glib"].opt_lib/"pkgconfig"
@@ -43,12 +43,12 @@ class Foundry < Formula
       Formula["template-glib"].opt_include/"template-glib-1.0",
       Formula["libsoup"].opt_include/"libsoup-3.0",
       Formula["gom"].opt_include/"gom-1.0",
-      Formula["sysprof"].opt_include/"sysprof-6"
+      Formula["sysprof"].opt_include/"sysprof-6",
     ]
-    
+
     ENV["C_INCLUDE_PATH"] = include_dirs.join(":")
     ENV["CPLUS_INCLUDE_PATH"] = include_dirs.join(":")
-    
+
     args = %W[
       --wrap-mode=nofallback
       --prefix=#{prefix}
@@ -64,31 +64,20 @@ class Foundry < Formula
       system "meson", "..", *args
       system "meson", "compile", "--verbose"
       system "meson", "install"
-      # Remove compiled schema file to avoid linking conflicts
-      rm_f "#{share}/glib-2.0/schemas/gschemas.compiled"
     end
 
     # Fix lib64 issue if it still occurs
-    if (prefix/"lib64").exist? && !(prefix/"lib").exist?
-      ln_s "lib64", prefix/"lib"
-    end
+    ln_s "lib64", prefix/"lib" if (prefix/"lib64").exist? && !(prefix/"lib").exist?
   end
 
   def caveats
     <<~EOS
-      To complete foundry setup:
+      Foundry requires GSettings schemas to run properly. If you encounter schema-related
+      errors, you may need to set the schema directory:
 
-      1. Set the schema directory:
-         export GSETTINGS_SCHEMA_DIR=#{opt_prefix}/share/glib-2.0/schemas:$GSETTINGS_SCHEMA_DIR
+        export GSETTINGS_SCHEMA_DIR=#{opt_prefix}/share/glib-2.0/schemas:$GSETTINGS_SCHEMA_DIR
 
-      2. Compile the schemas:
-         glib-compile-schemas #{opt_prefix}/share/glib-2.0/schemas
-
-      3. Add the export to your shell profile to make it permanent:
-         echo 'export GSETTINGS_SCHEMA_DIR=#{opt_prefix}/share/glib-2.0/schemas:$GSETTINGS_SCHEMA_DIR' >> ~/.bashrc
-         # or ~/.zshrc if using zsh
-
-      After setup, foundry will be ready to use in your development projects.
+      Add this to your shell profile (~/.bashrc or ~/.zshrc) to make it permanent.
     EOS
   end
 

@@ -66,7 +66,7 @@ jobs:
           esac
 
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
-          echo "branch=${FORMULA}-${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "branch=update-${FORMULA}-${VERSION}" >> "$GITHUB_OUTPUT"
 
   update-formula:
     needs: determine-config

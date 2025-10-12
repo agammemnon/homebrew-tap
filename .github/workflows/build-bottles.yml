@@ -97,7 +97,14 @@ jobs:
           VERSION="${{ needs.determine-config.outputs.version }}"
           GIT_URL="${{ needs.determine-config.outputs.git_url }}"
 
-          REVISION=$(git ls-remote "$GIT_URL" "refs/tags/${VERSION}" | cut -f1)
+          # First try to dereference the tag (in case it's an annotated tag)
+          REVISION=$(git ls-remote "$GIT_URL" "refs/tags/${VERSION}^{}" | cut -f1)
+
+          # If that didn't work, try without dereferencing (lightweight tag)
+          if [ -z "$REVISION" ]; then
+            REVISION=$(git ls-remote "$GIT_URL" "refs/tags/${VERSION}" | cut -f1)
+          fi
+
           if [ -z "$REVISION" ]; then
             echo "Error: Could not find revision for tag ${VERSION}" >&2
             exit 1

@@ -9,6 +9,11 @@ class Asusctl < Formula
     regex(/^v?(\d+(?:\.\d+)+)$/i)
   end
 
+  bottle do
+    root_url "https://github.com/agammemnon/homebrew-tap/releases/download/asusctl-6.1.14"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "b6c0376ba601707bde05c24920a6fd278d1b9d59c7546284461a0bdb2a9278e1"
+  end
+
   depends_on "llvm" => :build
   depends_on "pkg-config" => :build
   depends_on "rust" => :build

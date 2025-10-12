@@ -1,0 +1,302 @@
+{
+  "agammemnon/tap/asusctl": {
+    "formula": {
+      "name": "asusctl",
+      "pkg_version": "6.1.14",
+      "path": "Library/Taps/agammemnon/homebrew-tap/Formula/asusctl.rb",
+      "tap_git_path": "Formula/asusctl.rb",
+      "tap_git_revision": "0fa1b48cdf689fa4084920ec2bb65e10970f4f8e",
+      "tap_git_remote": "https://github.com/agammemnon/homebrew-tap",
+      "desc": "Control daemon, CLI tools for interacting with ASUS ROG laptops",
+      "license": "MPL-2.0",
+      "homepage": "https://gitlab.com/asus-linux/asusctl"
+    },
+    "bottle": {
+      "root_url": "https://github.com/agammemnon/homebrew-tap/releases/download/asusctl-6.1.14",
+      "cellar": "any_skip_relocation",
+      "rebuild": 0,
+      "date": "2025-10-12T01:37:05Z",
+      "tags": {
+        "x86_64_linux": {
+          "filename": "asusctl-6.1.14.x86_64_linux.bottle.tar.gz",
+          "local_filename": "asusctl--6.1.14.x86_64_linux.bottle.tar.gz",
+          "sha256": "b6c0376ba601707bde05c24920a6fd278d1b9d59c7546284461a0bdb2a9278e1",
+          "tab": {
+            "homebrew_version": "4.6.16",
+            "changed_files": [
+              ".bottle/etc/systemd/system/asusd.service",
+              ".bottle/etc/systemd/user/asusd-user.service",
+              "INSTALL_RECEIPT.json"
+            ],
+            "source_modified_time": 1759877785,
+            "compiler": "gcc-12",
+            "runtime_dependencies": [
+              {
+                "full_name": "bzip2",
+                "version": "1.0.8",
+                "revision": 0,
+                "bottle_rebuild": 2,
+                "pkg_version": "1.0.8",
+                "declared_directly": false
+              },
+              {
+                "full_name": "zlib",
+                "version": "1.3.1",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "1.3.1",
+                "declared_directly": false
+              },
+              {
+                "full_name": "pcre2",
+                "version": "10.46",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "10.46",
+                "declared_directly": false
+              },
+              {
+                "full_name": "expat",
+                "version": "2.7.3",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "2.7.3",
+                "declared_directly": false
+              },
+              {
+                "full_name": "dbus",
+                "version": "1.16.2",
+                "revision": 1,
+                "bottle_rebuild": 0,
+                "pkg_version": "1.16.2_1",
+                "declared_directly": false
+              },
+              {
+                "full_name": "ncurses",
+                "version": "6.5",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "6.5",
+                "declared_directly": false
+              },
+              {
+                "full_name": "readline",
+                "version": "8.3.1",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "8.3.1",
+                "declared_directly": false
+              },
+              {
+                "full_name": "libxcrypt",
+                "version": "4.4.38",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "4.4.38",
+                "declared_directly": false
+              },
+              {
+                "full_name": "sqlite",
+                "version": "3.50.4",
+                "revision": 0,
+                "bottle_rebuild": 2,
+                "pkg_version": "3.50.4",
+                "declared_directly": false
+              },
+              {
+                "full_name": "util-linux",
+                "version": "2.41.2",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "2.41.2",
+                "declared_directly": false
+              },
+              {
+                "full_name": "libffi",
+                "version": "3.5.2",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "3.5.2",
+                "declared_directly": false
+              },
+              {
+                "full_name": "mpdecimal",
+                "version": "4.0.1",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "4.0.1",
+                "declared_directly": false
+              },
+              {
+                "full_name": "ca-certificates",
+                "version": "2025-09-09",
+                "revision": 0,
+                "bottle_rebuild": 1,
+                "pkg_version": "2025-09-09",
+                "declared_directly": false
+              },
+              {
+                "full_name": "openssl@3",
+                "version": "3.6.0",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "3.6.0",
+                "declared_directly": false
+              },
+              {
+                "full_name": "xz",
+                "version": "5.8.1",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "5.8.1",
+                "declared_directly": false
+              },
+              {
+                "full_name": "lz4",
+                "version": "1.10.0",
+                "revision": 0,
+                "bottle_rebuild": 1,
+                "pkg_version": "1.10.0",
+                "declared_directly": false
+              },
+              {
+                "full_name": "zstd",
+                "version": "1.5.7",
+                "revision": 0,
+                "bottle_rebuild": 1,
+                "pkg_version": "1.5.7",
+                "declared_directly": false
+              },
+              {
+                "full_name": "berkeley-db@5",
+                "version": "5.3.28",
+                "revision": 1,
+                "bottle_rebuild": 0,
+                "pkg_version": "5.3.28_1",
+                "declared_directly": false
+              },
+              {
+                "full_name": "libedit",
+                "version": "20250104-3.1",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "20250104-3.1",
+                "declared_directly": false
+              },
+              {
+                "full_name": "unzip",
+                "version": "6.0",
+                "revision": 8,
+                "bottle_rebuild": 1,
+                "pkg_version": "6.0_8",
+                "declared_directly": false
+              },
+              {
+                "full_name": "python@3.14",
+                "version": "3.14.0",
+                "revision": 0,
+                "bottle_rebuild": 1,
+                "pkg_version": "3.14.0",
+                "declared_directly": false
+              },
+              {
+                "full_name": "glib",
+                "version": "2.86.0",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "2.86.0",
+                "declared_directly": false
+              },
+              {
+                "full_name": "libcap",
+                "version": "2.76",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "2.76",
+                "declared_directly": false
+              },
+              {
+                "full_name": "systemd",
+                "version": "258",
+                "revision": 0,
+                "bottle_rebuild": 1,
+                "pkg_version": "258",
+                "declared_directly": false
+              },
+              {
+                "full_name": "libgudev",
+                "version": "238",
+                "revision": 0,
+                "bottle_rebuild": 0,
+                "pkg_version": "238",
+                "declared_directly": true
+              }
+            ],
+            "arch": "x86_64",
+            "built_on": {
+              "os": "Linux",
+              "os_version": "Ubuntu 24.04.3 LTS",
+              "cpu_family": "zen3",
+              "glibc_version": "2.39",
+              "oldest_cpu_family": "core2"
+            }
+          },
+          "path_exec_files": [
+            "bin/asusd",
+            "bin/asusd-user",
+            "bin/asusctl"
+          ],
+          "all_files": [
+            ".bottle/etc/systemd/system/asusd.service",
+            ".bottle/etc/systemd/user/asusd-user.service",
+            ".brew/asusctl.rb",
+            ".crates.toml",
+            ".crates2.json",
+            "CHANGELOG.md",
+            "INSTALL_RECEIPT.json",
+            "LICENSE",
+            "README.md",
+            "bin/asusctl",
+            "bin/asusd",
+            "bin/asusd-user",
+            "lib/udev/rules.d/99-asusd.rules",
+            "sbom.spdx.json",
+            "share/asusd/aura_support.ron",
+            "share/dbus-1/system.d/asusd.conf",
+            "share/icons/hicolor/512x512/apps/asus_notif_blue.png",
+            "share/icons/hicolor/512x512/apps/asus_notif_green.png",
+            "share/icons/hicolor/512x512/apps/asus_notif_orange.png",
+            "share/icons/hicolor/512x512/apps/asus_notif_red.png",
+            "share/icons/hicolor/512x512/apps/asus_notif_white.png",
+            "share/icons/hicolor/512x512/apps/asus_notif_yellow.png",
+            "share/icons/hicolor/scalable/status/anime.svg",
+            "share/icons/hicolor/scalable/status/gpu-compute.svg",
+            "share/icons/hicolor/scalable/status/gpu-hybrid.svg",
+            "share/icons/hicolor/scalable/status/gpu-integrated.svg",
+            "share/icons/hicolor/scalable/status/gpu-nvidia.svg",
+            "share/icons/hicolor/scalable/status/gpu-vfio.svg",
+            "share/icons/hicolor/scalable/status/notification-reboot.svg",
+            "share/icons/hicolor/scalable/status/reboot.svg",
+            "share/icons/hicolor/scalable/status/rog-logo.svg",
+            "share/rog-gui/layouts/fa506i_US.ron",
+            "share/rog-gui/layouts/fa507_US.ron",
+            "share/rog-gui/layouts/fx505d_US.ron",
+            "share/rog-gui/layouts/g512_US.ron",
+            "share/rog-gui/layouts/g513i-per-key_US.ron",
+            "share/rog-gui/layouts/g513i_US.ron",
+            "share/rog-gui/layouts/g533q-per-key_US.ron",
+            "share/rog-gui/layouts/g533q_US.ron",
+            "share/rog-gui/layouts/g634j-per-key_US.ron",
+            "share/rog-gui/layouts/g733pz-per-key_US.ron",
+            "share/rog-gui/layouts/g814ji-per-key_US.ron",
+            "share/rog-gui/layouts/ga401q_US.ron",
+            "share/rog-gui/layouts/gl503_US.ron",
+            "share/rog-gui/layouts/gx502_US.ron",
+            "share/rog-gui/layouts/gx531-per-key_US.ron"
+          ],
+          "installed_size": 17817292
+        }
+      }
+    }
+  }
+}

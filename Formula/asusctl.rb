@@ -1,12 +1,17 @@
 class Asusctl < Formula
   desc "Control daemon, CLI tools for interacting with ASUS ROG laptops"
   homepage "https://gitlab.com/asus-linux/asusctl"
-  url "https://gitlab.com/asus-linux/asusctl.git", tag: "6.1.12", revision: "685345d6567bc366e93bbc3d7321f9d9a719a7ed"
+  url "https://gitlab.com/asus-linux/asusctl.git", tag: "6.1.14", revision: "f5e2484797d5046f74af2a46651d45d4fd652979"
   license "MPL-2.0"
 
   livecheck do
     url :stable
     regex(/^v?(\d+(?:\.\d+)+)$/i)
+  end
+
+  bottle do
+    root_url "https://github.com/agammemnon/homebrew-tap/releases/download/asusctl-6.1.14"
+    sha256 cellar: :any_skip_relocation, x86_64_linux: "989a78e6329e9ffcc1b87780218bf0b31c21943045dc33ecd732d904ea86ba4e"
   end
 
   depends_on "llvm" => :build

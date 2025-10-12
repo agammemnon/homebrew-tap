@@ -246,6 +246,9 @@ jobs:
       - name: Update formula with bottle SHAs
         run: |
           brew bottle --merge --write --no-commit ./*.bottle.json
+          # Delete bottle files so they don't get committed to git
+          # Only formulas should be committed; bottles belong in releases
+          rm -f ./*.bottle.*
 
       - name: Ensure on correct branch
         run: |

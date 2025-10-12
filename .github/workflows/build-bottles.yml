@@ -116,12 +116,31 @@ jobs:
           sed -i "s|tag: \"[^\"]*\"|tag: \"${VERSION}\"|" "Formula/${FORMULA}.rb"
           sed -i "s|revision: \"[^\"]*\"|revision: \"${REVISION}\"|" "Formula/${FORMULA}.rb"
 
+      - name: Check if changes exist
+        id: check-changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes detected - formula already at target version"
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Changes detected - formula needs update"
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Create PR for formula update
+        if: steps.check-changes.outputs.has_changes == 'true'
         uses: peter-evans/create-pull-request@v6
         with:
           branch: ${{ needs.determine-config.outputs.branch }}
           title: "Update ${{ needs.determine-config.outputs.formula }} to ${{ needs.determine-config.outputs.version }}"
           commit-message: "chore: update ${{ needs.determine-config.outputs.formula }} to ${{ needs.determine-config.outputs.version }}"
+
+      - name: Create branch manually if no changes
+        if: steps.check-changes.outputs.has_changes == 'false'
+        run: |
+          BRANCH="${{ needs.determine-config.outputs.branch }}"
+          git checkout -b "$BRANCH"
+          git push origin "$BRANCH"
 
       - name: Wait for branch to be available
         run: |

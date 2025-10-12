@@ -242,7 +242,20 @@ jobs:
 
       - name: Ensure on correct branch
         run: |
-          git checkout ${{ needs.determine-config.outputs.branch }}
+          # Check current branch
+          CURRENT_BRANCH=$(git branch --show-current)
+          TARGET_BRANCH="${{ needs.determine-config.outputs.branch }}"
+
+          if [ "$CURRENT_BRANCH" != "$TARGET_BRANCH" ]; then
+            echo "Current branch: $CURRENT_BRANCH, switching to: $TARGET_BRANCH"
+            # Stash any changes from brew bottle --merge
+            git stash
+            git checkout "$TARGET_BRANCH"
+            git stash pop
+          else
+            echo "Already on branch: $TARGET_BRANCH"
+          fi
+
           git status
 
       - name: Commit bottle updates

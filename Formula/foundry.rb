@@ -12,7 +12,7 @@ class Foundry < Formula
   bottle do
     root_url "https://github.com/agammemnon/homebrew-tap/releases/download/foundry-1.0.0"
     rebuild 1
-    sha256 x86_64_linux: "70216443ee21f2262a10b57836e653acf8de484d12362f1aee73452ccc3b476e"
+    sha256 x86_64_linux: "dcd649cf9bf57b210a2a0f23e75bd2987d4b66e61bbae784f59c047d1b01543b"
   end
 
   depends_on "cmake" => :build

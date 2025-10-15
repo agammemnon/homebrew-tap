@@ -8,8 +8,10 @@ cask "google-chrome-linux" do
   homepage "https://www.google.com/chrome/"
 
   livecheck do
-    url "https://chromereleases.googleblog.com/search/label/Stable%20updates"
-    regex(/Chrome\s+(\d+(?:\.\d+)+)/i)
+    url "https://versionhistory.googleapis.com/v1/chrome/platforms/linux/channels/stable/versions"
+    strategy :json do |json|
+      json["versions"]&.first&.dig("version")
+    end
   end
 
   auto_updates true

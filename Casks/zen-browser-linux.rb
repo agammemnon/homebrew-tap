@@ -8,9 +8,8 @@ cask "zen-browser-linux" do
   homepage "https://github.com/zen-browser/desktop"
 
   livecheck do
-    url :url
-    strategy :github_latest
-    regex(/^v?(\d+(?:\.\d+)+b?)$/i)
+    url "https://github.com/zen-browser/desktop/releases"
+    strategy :github_releases
   end
 
   binary "zen/zen"

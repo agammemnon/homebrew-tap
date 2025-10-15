@@ -1,0 +1,51 @@
+name: Bump casks on schedule
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Every 4 hours
+    - cron: "0 */4 * * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autobump:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cask:
+          - zen-browser-linux
+          - google-chrome-linux
+          - helium-browser-linux
+      fail-fast: false
+    env:
+      HOMEBREW_DEVELOPER: 1
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Tap repository
+        run: brew tap agammemnon/tap
+
+      - name: Configure Git user
+        uses: Homebrew/actions/git-user-config@master
+        with:
+          username: ${{ github.actor }}
+
+      - name: Bump ${{ matrix.cask }}
+        env:
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+        run: |
+          echo "Checking ${{ matrix.cask }}..."
+          brew bump --open-pr --cask "agammemnon/tap/${{ matrix.cask }}"
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "### Cask Bump Result" >> $GITHUB_STEP_SUMMARY
+          echo "Attempted to bump: \`${{ matrix.cask }}\`" >> $GITHUB_STEP_SUMMARY

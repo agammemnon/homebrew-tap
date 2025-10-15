@@ -10,6 +10,7 @@ cask "zen-browser-linux" do
   livecheck do
     url :url
     strategy :github_latest
+    regex(/^v?(\d+(?:\.\d+)+b?)$/i)
   end
 
   binary "zen/zen"

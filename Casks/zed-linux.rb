@@ -26,6 +26,7 @@ cask "zed-linux" do
     desktop_content = File.read("#{staged_path}/zed.app/share/applications/zed.desktop")
     desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/zed")
     desktop_content.gsub!(/^Exec=zed/, "Exec=#{HOMEBREW_PREFIX}/bin/zed")
+    desktop_content.gsub!(/^Icon=.*/, "Icon=zed")
     File.write("#{staged_path}/zed.desktop", desktop_content)
   end
 

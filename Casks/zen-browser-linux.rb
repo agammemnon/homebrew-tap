@@ -2,7 +2,7 @@ cask "zen-browser-linux" do
   version "1.15.5b"
   sha256 "10976d3935327a3262157407e40e6bad9ae1db6fe7a80d2e97e70742e1047f68"
 
-  url "https://github.com/zen-browser/desktop/releases/download/#{version}/zen.linux-x86_64.tar.xz"
+  url "https://github.com/zen-browser/desktop/releases/download/#{version}b/zen.linux-x86_64.tar.xz"
   name "Zen Browser"
   desc "Privacy-focused web browser based on Firefox"
   homepage "https://github.com/zen-browser/desktop"

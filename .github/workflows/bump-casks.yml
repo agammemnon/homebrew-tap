@@ -42,7 +42,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "Checking ${{ matrix.cask }}..."
-          brew bump --open-pr --cask "agammemnon/tap/${{ matrix.cask }}"
+          brew bump --no-fork --open-pr --cask "agammemnon/tap/${{ matrix.cask }}"
 
       - name: Summary
         if: always()

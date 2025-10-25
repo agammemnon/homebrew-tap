@@ -3,8 +3,8 @@ name: Bump casks on schedule
 on:
   workflow_dispatch:
   # schedule:
-    # Every 4 hours
-    # - cron: "0 */4 * * *"
+  # Every 4 hours
+  # - cron: "0 */4 * * *"
 
 permissions:
   contents: write
@@ -19,6 +19,8 @@ jobs:
           - zen-browser-linux
           - google-chrome-linux
           - helium-browser-linux
+          - zed-linux
+          - zed-linux@preview
       fail-fast: false
     env:
       HOMEBREW_DEVELOPER: 1

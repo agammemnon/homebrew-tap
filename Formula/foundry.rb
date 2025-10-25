@@ -77,7 +77,7 @@ class Foundry < Formula
       system "meson", "compile", "--verbose"
       system "meson", "install"
       # Remove compiled schema file to avoid linking conflicts
-      rm_f "#{share}/glib-2.0/schemas/gschemas.compiled"
+      rm("#{share}/glib-2.0/schemas/gschemas.compiled")
     end
 
     # Fix lib64 issue if it still occurs

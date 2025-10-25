@@ -2,7 +2,7 @@ cask "ghostty-linux" do
   version "1.2.0+1"
   sha256 "fa125399dd12fe7674e3e39c89aa3a1b2108a03853bb947c31e65aad7d10e8fb"
 
-  url "https://github.com/pkgforge-dev/ghostty-appimage/releases/download/v#{version}/Ghostty-#{version.split('+').first}-x86_64.AppImage"
+  url "https://github.com/pkgforge-dev/ghostty-appimage/releases/download/v#{version}/Ghostty-#{version.split("+").first}-x86_64.AppImage"
   name "Ghostty"
   desc "Fast, feature-rich, and native terminal emulator"
   homepage "https://ghostty.org/"
@@ -20,7 +20,7 @@ cask "ghostty-linux" do
 
   preflight do
     # Extract AppImage contents
-    appimage_path = "#{staged_path}/Ghostty-#{version.split('+').first}-x86_64.AppImage"
+    appimage_path = "#{staged_path}/Ghostty-#{version.split("+").first}-x86_64.AppImage"
     system "chmod", "+x", appimage_path
     system appimage_path, "--appimage-extract", chdir: staged_path
 

@@ -174,7 +174,7 @@ The ollama plugin was including libsoup headers and depending on libsoup-3.0. Ho
 The formula was building with:
 ```ruby
 -Dgtk=false
--Dintrospection=disabled
+-Dintrospection=(disabled).freeze
 -Ddocs=false
 -Dfeature-flatpak=false
 ```
@@ -209,7 +209,7 @@ args = %W[
   -Dintrospection=disabled
   -Ddocs=false
   -Dfeature-flatpak=false
-  -Dfeature-llm=false          # Added this line
+  -Dfeature-llm=false # Added this line
 ]
 ```
 
@@ -284,7 +284,7 @@ However, this should be a normal part of the bottling process and shouldn't caus
 
 ### What We've Tried
 
-#### 1. Rebuilding with Different Configurations 
+#### 1. Rebuilding with Different Configurations
 
 **Attempts:**
 - Rebuilt bottle multiple times with `brew install --build-bottle`

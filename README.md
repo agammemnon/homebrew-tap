@@ -1,6 +1,6 @@
 # Agamemnon Homebrew Tap
 
-A custom Homebrew tap providing formulas and casks for Linux applications, with a focus on ASUS laptop tools, privacy-focused browsers, modern terminal emulators, and development tools. Features automated CI/CD workflows for bottle building and version updates.
+A custom WIP Homebrew tap providing formulas and casks for Linux applications, with a focus on vendor tools, privacy-focused browsers, modern terminal emulators, and development tools. Features automated CI/CD workflows for bottle building and version updates.
 
 ## Installation
 

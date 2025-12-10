@@ -7,10 +7,14 @@ cask "ghostty-linux" do
   desc "Fast, feature-rich, and native terminal emulator"
   homepage "https://ghostty.org/"
 
-  auto_updates true
+  livecheck do
+    url :url
+    strategy :github_latest
+  end
+
   depends_on formula: "squashfs"
 
-  binary "squashfs-root/AppRun", target: "ghostty"
+  binary "ghostty-wrapper", target: "ghostty"
   artifact "squashfs-root/com.mitchellh.ghostty.png",
            target: "#{Dir.home}/.local/share/icons/ghostty.png"
   artifact "squashfs-root/com.mitchellh.ghostty.desktop",
@@ -35,6 +39,16 @@ cask "ghostty-linux" do
     desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/ghostty")
     desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/ghostty")
     File.write("#{staged_path}/squashfs-root/com.mitchellh.ghostty.desktop", desktop_content)
+
+    # Create wrapper script to execute AppRun from the correct directory
+    # (upstream switched from binary AppRun to shell script in v1.2.3 which
+    # breaks symlinks since it uses $0's directory to find resources)
+    wrapper_content = <<~SH
+      #!/bin/sh
+      exec "#{staged_path}/squashfs-root/AppRun" "$@"
+    SH
+    File.write("#{staged_path}/ghostty-wrapper", wrapper_content)
+    FileUtils.chmod(0755, "#{staged_path}/ghostty-wrapper")
   end
 
   zap trash: "~/.config/ghostty"

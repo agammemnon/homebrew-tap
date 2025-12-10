@@ -14,8 +14,6 @@ cask "google-chrome-linux" do
     end
   end
 
-  auto_updates true
-
   binary "#{staged_path}/chrome-extracted/opt/google/chrome/google-chrome", target: "google-chrome"
 
   preflight do

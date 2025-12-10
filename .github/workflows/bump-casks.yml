@@ -21,6 +21,7 @@ jobs:
           - helium-browser-linux
           - zed-linux
           - zed-linux@preview
+          - ghostty-linux
       fail-fast: false
     env:
       HOMEBREW_DEVELOPER: 1
@@ -49,5 +50,5 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          echo "### Cask Bump Result" >> $GITHUB_STEP_SUMMARY
-          echo "Attempted to bump: \`${{ matrix.cask }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "### Cask Bump Result" >> "$GITHUB_STEP_SUMMARY"
+          echo "Attempted to bump: \`${{ matrix.cask }}\`" >> "$GITHUB_STEP_SUMMARY"

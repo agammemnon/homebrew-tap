@@ -2,9 +2,8 @@ name: Bump casks on schedule
 
 on:
   workflow_dispatch:
-  # schedule:
-  # Every 4 hours
-  # - cron: "0 */4 * * *"
+  schedule:
+    - cron: "0 */4 * * *" # Every 4 hours
 
 permissions:
   contents: write

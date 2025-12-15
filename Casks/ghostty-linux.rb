@@ -15,12 +15,6 @@ cask "ghostty-linux" do
   depends_on formula: "squashfs"
 
   binary "ghostty-wrapper", target: "ghostty"
-  artifact "squashfs-root/com.mitchellh.ghostty.png",
-           target: "#{Dir.home}/.local/share/icons/ghostty.png"
-  artifact "squashfs-root/com.mitchellh.ghostty.desktop",
-           target: "#{Dir.home}/.local/share/applications/ghostty.desktop"
-  artifact "squashfs-root/share/dbus-1/services/com.mitchellh.ghostty.service",
-           target: "#{Dir.home}/.local/share/systemd/user/com.mitchellh.ghostty.service"
 
   preflight do
     # Extract AppImage contents
@@ -33,12 +27,7 @@ cask "ghostty-linux" do
 
     FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
     FileUtils.mkdir_p "#{Dir.home}/.local/share/icons"
-
-    # Fix the desktop file - update both TryExec and Exec to point to Homebrew binary
-    desktop_content = File.read("#{staged_path}/squashfs-root/com.mitchellh.ghostty.desktop")
-    desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/ghostty")
-    desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/ghostty")
-    File.write("#{staged_path}/squashfs-root/com.mitchellh.ghostty.desktop", desktop_content)
+    FileUtils.mkdir_p "#{Dir.home}/.local/share/systemd/user"
 
     # Create wrapper script to execute AppRun from the correct directory
     # (upstream switched from binary AppRun to shell script in v1.2.3 which
@@ -49,6 +38,25 @@ cask "ghostty-linux" do
     SH
     File.write("#{staged_path}/ghostty-wrapper", wrapper_content)
     FileUtils.chmod(0755, "#{staged_path}/ghostty-wrapper")
+  end
+
+  postflight do
+    # Fix the desktop file - update both TryExec and Exec to point to Homebrew binary
+    desktop_content = File.read("#{staged_path}/squashfs-root/com.mitchellh.ghostty.desktop")
+    desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/ghostty")
+    desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/ghostty")
+    File.write("#{Dir.home}/.local/share/applications/ghostty.desktop", desktop_content)
+
+    FileUtils.cp("#{staged_path}/squashfs-root/com.mitchellh.ghostty.png",
+                 "#{Dir.home}/.local/share/icons/ghostty.png")
+    FileUtils.cp("#{staged_path}/squashfs-root/share/dbus-1/services/com.mitchellh.ghostty.service",
+                 "#{Dir.home}/.local/share/systemd/user/com.mitchellh.ghostty.service")
+  end
+
+  uninstall_postflight do
+    FileUtils.rm("#{Dir.home}/.local/share/applications/ghostty.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/icons/ghostty.png")
+    FileUtils.rm("#{Dir.home}/.local/share/systemd/user/com.mitchellh.ghostty.service")
   end
 
   zap trash: "~/.config/ghostty"

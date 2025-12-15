@@ -59,6 +59,10 @@ cask "google-chrome-linux" do
     end
   end
 
+  uninstall_postflight do
+    FileUtils.rm("#{Dir.home}/.local/share/applications/google-chrome.desktop")
+  end
+
   zap trash: [
     "~/.cache/google-chrome",
     "~/.config/google-chrome",

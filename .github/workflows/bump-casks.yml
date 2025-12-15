@@ -46,6 +46,18 @@ jobs:
           echo "Checking ${{ matrix.cask }}..."
           brew bump --no-fork --open-pr --cask "agammemnon/tap/${{ matrix.cask }}"
 
+      - name: Enable auto-merge for created PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --repo "${{ github.repository }}" --author "github-actions[bot]" --state open --json number,title --jq '.[] | select(.title | test("${{ matrix.cask }}"; "i")) | .number' | head -1)
+          if [ -n "$PR_NUMBER" ]; then
+            echo "Enabling auto-merge for PR #$PR_NUMBER"
+            gh pr merge "$PR_NUMBER" --repo "${{ github.repository }}" --auto --squash
+          else
+            echo "No open PR found for ${{ matrix.cask }}"
+          fi
+
       - name: Summary
         if: always()
         run: |

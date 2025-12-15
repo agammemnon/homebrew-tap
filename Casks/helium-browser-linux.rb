@@ -13,16 +13,14 @@ cask "helium-browser-linux" do
   end
 
   binary "helium-#{version}-x86_64_linux/chrome-wrapper", target: "helium"
-  artifact "helium.desktop",
-           target: "#{Dir.home}/.local/share/applications/helium.desktop"
-  artifact "helium-#{version}-x86_64_linux/product_logo_256.png",
-           target: "#{Dir.home}/.local/share/icons/helium.png"
 
   preflight do
     FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
     FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
+  end
 
-    File.write("#{staged_path}/helium.desktop", <<~EOS)
+  postflight do
+    File.write("#{Dir.home}/.local/share/applications/helium.desktop", <<~EOS)
       [Desktop Entry]
       Name=Helium Browser
       Comment=Open-source browser based on ungoogled-chromium
@@ -35,6 +33,13 @@ cask "helium-browser-linux" do
       MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;video/webm;application/x-xpinstall;
       StartupWMClass=helium
     EOS
+    FileUtils.cp("#{staged_path}/helium-#{version}-x86_64_linux/product_logo_256.png",
+                 "#{Dir.home}/.local/share/icons/helium.png")
+  end
+
+  uninstall_postflight do
+    FileUtils.rm("#{Dir.home}/.local/share/applications/helium.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/icons/helium.png")
   end
 
   zap trash: [

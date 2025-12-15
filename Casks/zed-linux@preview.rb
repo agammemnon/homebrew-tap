@@ -15,21 +15,27 @@ cask "zed-linux@preview" do
   end
 
   binary "zed-preview.app/bin/zed", target: "zed-preview"
-  artifact "zed-preview.desktop",
-           target: "#{Dir.home}/.local/share/applications/zed-preview.desktop"
-  artifact "zed-preview.app/share/icons/hicolor/512x512/apps/zed.png",
-           target: "#{Dir.home}/.local/share/icons/zed-preview.png"
 
   preflight do
     FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
     FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
+  end
 
+  postflight do
     # Read and modify the existing desktop file to point to Homebrew binary
     desktop_content = File.read("#{staged_path}/zed-preview.app/share/applications/zed-preview.desktop")
     desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/zed-preview")
     desktop_content.gsub!(/^Exec=zed-preview/, "Exec=#{HOMEBREW_PREFIX}/bin/zed-preview")
     desktop_content.gsub!(/^Icon=.*/, "Icon=zed-preview")
-    File.write("#{staged_path}/zed-preview.desktop", desktop_content)
+    File.write("#{Dir.home}/.local/share/applications/zed-preview.desktop", desktop_content)
+
+    FileUtils.cp("#{staged_path}/zed-preview.app/share/icons/hicolor/512x512/apps/zed.png",
+                 "#{Dir.home}/.local/share/icons/zed-preview.png")
+  end
+
+  uninstall_postflight do
+    FileUtils.rm("#{Dir.home}/.local/share/applications/zed-preview.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/icons/zed-preview.png")
   end
 
   zap trash: [

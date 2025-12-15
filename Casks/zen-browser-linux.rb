@@ -13,16 +13,14 @@ cask "zen-browser-linux" do
   end
 
   binary "zen/zen"
-  artifact "zen.desktop",
-           target: "#{Dir.home}/.local/share/applications/zen.desktop"
-  artifact "zen/browser/chrome/icons/default/default128.png",
-           target: "#{Dir.home}/.local/share/icons/zen.png"
 
   preflight do
     FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
     FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
+  end
 
-    File.write("#{staged_path}/zen.desktop", <<~EOS)
+  postflight do
+    File.write("#{Dir.home}/.local/share/applications/zen.desktop", <<~EOS)
       [Desktop Entry]
       Name=Zen Browser
       Comment=Privacy-focused web browser based on Firefox
@@ -35,6 +33,13 @@ cask "zen-browser-linux" do
       MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
       StartupWMClass=zen
     EOS
+    FileUtils.cp("#{staged_path}/zen/browser/chrome/icons/default/default128.png",
+                 "#{Dir.home}/.local/share/icons/zen.png")
+  end
+
+  uninstall_postflight do
+    FileUtils.rm("#{Dir.home}/.local/share/applications/zen.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/icons/zen.png")
   end
 
   zap trash: [

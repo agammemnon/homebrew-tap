@@ -40,7 +40,7 @@ jobs:
 
       - name: Bump ${{ matrix.cask }}
         env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.PAT_TOKEN }}
         continue-on-error: true
         run: |
           echo "Checking ${{ matrix.cask }}..."
@@ -48,9 +48,9 @@ jobs:
 
       - name: Enable auto-merge for created PR
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          PR_NUMBER=$(gh pr list --repo "${{ github.repository }}" --author "github-actions[bot]" --state open --json number,title --jq '.[] | select(.title | test("${{ matrix.cask }}"; "i")) | .number' | head -1)
+          PR_NUMBER=$(gh pr list --repo "${{ github.repository }}" --state open --json number,title --jq '.[] | select(.title | test("${{ matrix.cask }}"; "i")) | .number' | head -1)
           if [ -n "$PR_NUMBER" ]; then
             echo "Enabling auto-merge for PR #$PR_NUMBER"
             gh pr merge "$PR_NUMBER" --repo "${{ github.repository }}" --auto --squash

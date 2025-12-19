@@ -10,22 +10,25 @@ permissions:
   pull-requests: write
 
 jobs:
+  list-casks:
+    runs-on: ubuntu-latest
+    outputs:
+      casks: ${{ steps.get-casks.outputs.casks }}
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Get cask list
+      id: get-casks
+      run: |
+        casks=$(find Casks -name '*.rb' -exec basename {} .rb \; | jq -R -s -c 'split("\n") | map(select(length > 0))')
+        echo "casks=$casks" >> "$GITHUB_OUTPUT"
+
   autobump:
+    needs: list-casks
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        cask:
-          - zen-browser-linux
-          - google-chrome-linux
-          - helium-browser-linux
-          - zed-linux
-          - zed-linux@preview
-          - ghostty-linux
-          - antigravity-linux
-          - goland-linux
-          - intellij-idea-linux
-          - cursor-linux
-          - rubymine-linux
+        cask: ${{ fromJson(needs.list-casks.outputs.casks) }}
       fail-fast: false
     env:
       HOMEBREW_DEVELOPER: 1

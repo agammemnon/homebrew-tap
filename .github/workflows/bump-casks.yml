@@ -21,6 +21,11 @@ jobs:
           - zed-linux
           - zed-linux@preview
           - ghostty-linux
+          - antigravity-linux
+          - goland
+          - intellij-idea-linux
+          - cursor-linux
+          - ruby-mine
       fail-fast: false
     env:
       HOMEBREW_DEVELOPER: 1

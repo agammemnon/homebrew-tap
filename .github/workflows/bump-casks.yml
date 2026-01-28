@@ -10,29 +10,13 @@ permissions:
   pull-requests: write
 
 jobs:
-  list-casks:
+  bump:
     runs-on: ubuntu-latest
-    outputs:
-      casks: ${{ steps.get-casks.outputs.casks }}
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Get cask list
-      id: get-casks
-      run: |
-        casks=$(find Casks -name '*.rb' -exec basename {} .rb \; | jq -R -s -c 'split("\n") | map(select(length > 0))')
-        echo "casks=$casks" >> "$GITHUB_OUTPUT"
-
-  autobump:
-    needs: list-casks
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        cask: ${{ fromJson(needs.list-casks.outputs.casks) }}
-      fail-fast: false
     env:
       HOMEBREW_DEVELOPER: 1
       HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.PAT_TOKEN }}
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
@@ -46,28 +30,44 @@ jobs:
         with:
           username: ${{ github.actor }}
 
-      - name: Bump ${{ matrix.cask }}
-        env:
-          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.PAT_TOKEN }}
-        continue-on-error: true
+      - name: Close stale bump PRs
         run: |
-          echo "Checking ${{ matrix.cask }}..."
-          brew bump --no-fork --open-pr --cask "agammemnon/tap/${{ matrix.cask }}"
+          gh pr list --repo "${{ github.repository }}" --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("bump-")) | .number' | while read -r pr; do
+            echo "Closing stale PR #$pr"
+            gh pr close "$pr" --repo "${{ github.repository }}" --delete-branch || true
+          done
 
-      - name: Enable auto-merge for created PR
+      - name: Bump outdated casks
+        run: brew bump --tap agammemnon/tap --cask --no-fork --open-pr
+
+      - name: Enable auto-merge on bump PRs
+        run: |
+          gh pr list --repo "${{ github.repository }}" --state open --json number,headRefName \
+            --jq '.[] | select(.headRefName | startswith("bump-")) | .number' | while read -r pr; do
+            echo "Enabling auto-merge for PR #$pr"
+            gh pr merge "$pr" --repo "${{ github.repository }}" --auto --squash || true
+          done
+
+  cleanup:
+    needs: bump
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete stale bump branches
         env:
           GH_TOKEN: ${{ secrets.PAT_TOKEN }}
         run: |
-          PR_NUMBER=$(gh pr list --repo "${{ github.repository }}" --state open --json number,title --jq '.[] | select(.title | test("${{ matrix.cask }}"; "i")) | .number' | head -1)
-          if [ -n "$PR_NUMBER" ]; then
-            echo "Enabling auto-merge for PR #$PR_NUMBER"
-            gh pr merge "$PR_NUMBER" --repo "${{ github.repository }}" --auto --squash
-          else
-            echo "No open PR found for ${{ matrix.cask }}"
-          fi
+          git branch -r | grep 'origin/bump-' | sed 's|origin/||' | while read -r branch; do
+            PR_STATE=$(gh pr list --repo "${{ github.repository }}" --head "$branch" --state all --json state \
+              --jq '.[0].state // empty' 2>/dev/null) || true
 
-      - name: Summary
-        if: always()
-        run: |
-          echo "### Cask Bump Result" >> "$GITHUB_STEP_SUMMARY"
-          echo "Attempted to bump: \`${{ matrix.cask }}\`" >> "$GITHUB_STEP_SUMMARY"
+            if [ "$PR_STATE" = "MERGED" ] || [ "$PR_STATE" = "CLOSED" ] || [ -z "$PR_STATE" ]; then
+              echo "Deleting branch: $branch (${PR_STATE:-orphaned})"
+              git push origin --delete "$branch" 2>/dev/null || true
+            fi
+          done

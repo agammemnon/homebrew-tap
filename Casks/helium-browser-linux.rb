@@ -12,7 +12,7 @@ cask "helium-browser-linux" do
     strategy :github_latest
   end
 
-  binary "helium-#{version}-x86_64_linux/chrome-wrapper", target: "helium"
+  binary "helium-#{version}-x86_64_linux/helium", target: "helium"
 
   preflight do
     FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")

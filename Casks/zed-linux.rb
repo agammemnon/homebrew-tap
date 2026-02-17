@@ -1,6 +1,6 @@
 cask "zed-linux" do
-  version "0.223.3"
-  sha256 "4e871650aca1dbfc2f4daab83145425078da978093bd6da3b90da3ea592c6031"
+  version "0.223.4"
+  sha256 "3b565b6c9b0a6f72090dafacb89e02defc8543a12d5701134630ca0193b4ddf2"
 
   url "https://github.com/zed-industries/zed/releases/download/v#{version}/zed-linux-x86_64.tar.gz"
   name "Zed"

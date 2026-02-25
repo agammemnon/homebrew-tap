@@ -1,5 +1,5 @@
 cask "docker-desktop-linux" do
-  version "4.60.1"
+  version "4.62.0,219486"
   sha256 :no_check
 
   url "https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm"
@@ -13,6 +13,10 @@ cask "docker-desktop-linux" do
   end
 
   binary "#{staged_path}/dd-extracted/opt/docker-desktop/bin/docker-desktop", target: "docker-desktop"
+  artifact "docker-desktop.desktop",
+           target: "#{Dir.home}/.local/share/applications/docker-desktop.desktop"
+  artifact "docker-desktop.png",
+           target: "#{Dir.home}/.local/share/icons/docker-desktop.png"
 
   preflight do
     # Extract RPM contents
@@ -34,21 +38,22 @@ cask "docker-desktop-linux" do
     bundled_desktop = "#{extract_dir}/usr/share/applications/docker-desktop.desktop"
     if File.exist?(bundled_desktop)
       desktop_content = File.read(bundled_desktop)
-      desktop_content.gsub!(%r{^Exec=.*}, "Exec=#{HOMEBREW_PREFIX}/bin/docker-desktop")
-      desktop_content.gsub!(%r{^Icon=.*}, "Icon=#{Dir.home}/.local/share/icons/docker-desktop.png")
+      desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/docker-desktop")
+      desktop_content.gsub!(/^Icon=.*/, "Icon=#{Dir.home}/.local/share/icons/docker-desktop.png")
       File.write("#{staged_path}/docker-desktop.desktop", desktop_content)
     end
   end
 
-  artifact "docker-desktop.desktop",
-           target: "#{Dir.home}/.local/share/applications/docker-desktop.desktop"
-  artifact "docker-desktop.png",
-           target: "#{Dir.home}/.local/share/icons/docker-desktop.png"
-
   uninstall_postflight do
-    FileUtils.rm_f "#{Dir.home}/.local/share/applications/docker-desktop.desktop"
-    FileUtils.rm_f "#{Dir.home}/.local/share/icons/docker-desktop.png"
+    FileUtils.rm("#{Dir.home}/.local/share/applications/docker-desktop.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/icons/docker-desktop.png")
   end
+
+  zap trash: [
+    "~/.docker",
+    "~/.local/share/applications/docker-desktop.desktop",
+    "~/.local/share/icons/docker-desktop.png",
+  ]
 
   caveats <<~EOS
     Docker Desktop requires additional post-install setup that the RPM
@@ -67,10 +72,4 @@ cask "docker-desktop-linux" do
       systemctl --user start docker-desktop
       systemctl --user enable docker-desktop
   EOS
-
-  zap trash: [
-    "~/.docker",
-    "~/.local/share/applications/docker-desktop.desktop",
-    "~/.local/share/icons/docker-desktop.png",
-  ]
 end

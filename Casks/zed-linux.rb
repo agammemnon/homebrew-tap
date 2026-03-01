@@ -21,18 +21,18 @@ cask "zed-linux" do
 
   postflight do
     # Read and modify the existing desktop file to point to Homebrew binary
-    desktop_content = File.read("#{staged_path}/zed.app/share/applications/zed.desktop")
+    desktop_content = File.read("#{staged_path}/zed.app/share/applications/dev.zed.Zed.desktop")
     desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/zed")
     desktop_content.gsub!(/^Exec=zed/, "Exec=#{HOMEBREW_PREFIX}/bin/zed")
     desktop_content.gsub!(/^Icon=.*/, "Icon=zed")
-    File.write("#{Dir.home}/.local/share/applications/zed.desktop", desktop_content)
+    File.write("#{Dir.home}/.local/share/applications/dev.zed.Zed.desktop", desktop_content)
 
     FileUtils.cp("#{staged_path}/zed.app/share/icons/hicolor/512x512/apps/zed.png",
                  "#{Dir.home}/.local/share/icons/zed.png")
   end
 
   uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/zed.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/applications/dev.zed.Zed.desktop")
     FileUtils.rm("#{Dir.home}/.local/share/icons/zed.png")
   end
 

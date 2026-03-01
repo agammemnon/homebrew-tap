@@ -23,18 +23,18 @@ cask "zed-linux@preview" do
 
   postflight do
     # Read and modify the existing desktop file to point to Homebrew binary
-    desktop_content = File.read("#{staged_path}/zed-preview.app/share/applications/zed-preview.desktop")
+    desktop_content = File.read("#{staged_path}/zed-preview.app/share/applications/dev.zed.Zed-Preview.desktop")
     desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/zed-preview")
-    desktop_content.gsub!(/^Exec=zed-preview/, "Exec=#{HOMEBREW_PREFIX}/bin/zed-preview")
+    desktop_content.gsub!(/^Exec=zed/, "Exec=#{HOMEBREW_PREFIX}/bin/zed-preview")
     desktop_content.gsub!(/^Icon=.*/, "Icon=zed-preview")
-    File.write("#{Dir.home}/.local/share/applications/zed-preview.desktop", desktop_content)
+    File.write("#{Dir.home}/.local/share/applications/dev.zed.Zed-Preview.desktop", desktop_content)
 
     FileUtils.cp("#{staged_path}/zed-preview.app/share/icons/hicolor/512x512/apps/zed.png",
                  "#{Dir.home}/.local/share/icons/zed-preview.png")
   end
 
   uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/zed-preview.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/applications/dev.zed.Zed-Preview.desktop")
     FileUtils.rm("#{Dir.home}/.local/share/icons/zed-preview.png")
   end
 

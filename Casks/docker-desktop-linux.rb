@@ -1,5 +1,5 @@
 cask "docker-desktop-linux" do
-  version "4.62.0,219486"
+  version "4.63.0,220185"
   sha256 :no_check
 
   url "https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm"
@@ -49,7 +49,7 @@ cask "docker-desktop-linux" do
     service_source = "#{extract_dir}/usr/lib/systemd/user/docker-desktop.service"
     if File.exist?(service_source)
       service_content = File.read(service_source)
-      service_content.gsub!(%r{^ExecStart=.*}, "ExecStart=#{extract_dir}/opt/docker-desktop/bin/com.docker.backend")
+      service_content.gsub!(/^ExecStart=.*/, "ExecStart=#{extract_dir}/opt/docker-desktop/bin/com.docker.backend")
       File.write("#{systemd_user_dir}/docker-desktop.service", service_content)
     end
 
@@ -71,22 +71,28 @@ cask "docker-desktop-linux" do
   end
 
   uninstall_preflight do
-    system "systemctl", "--user", "stop", "docker-desktop" if system("systemctl", "--user", "is-active", "--quiet", "docker-desktop")
-    system "systemctl", "--user", "disable", "docker-desktop" if system("systemctl", "--user", "is-enabled", "--quiet", "docker-desktop")
+    system "systemctl", "--user", "stop", "docker-desktop" if system("systemctl", "--user", "is-active", "--quiet",
+                                                                     "docker-desktop")
+    system "systemctl", "--user", "disable", "docker-desktop" if system("systemctl", "--user", "is-enabled",
+                                                                        "--quiet", "docker-desktop")
   end
 
   uninstall_postflight do
-    FileUtils.rm_f("#{Dir.home}/.local/share/applications/docker-desktop.desktop")
-    FileUtils.rm_f("#{Dir.home}/.local/share/icons/docker-desktop.png")
-    FileUtils.rm_f("#{Dir.home}/.config/systemd/user/docker-desktop.service")
-    FileUtils.rm_f("#{HOMEBREW_PREFIX}/bin/docker-credential-desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/applications/docker-desktop.desktop")
+    FileUtils.rm("#{Dir.home}/.local/share/icons/docker-desktop.png")
+    FileUtils.rm("#{Dir.home}/.config/systemd/user/docker-desktop.service")
+    FileUtils.rm("#{HOMEBREW_PREFIX}/bin/docker-credential-desktop")
 
     # Remove CLI plugin symlinks
     docker_cli_dir = "#{Dir.home}/.docker/cli-plugins"
     if Dir.exist?(docker_cli_dir)
       Dir.glob("#{docker_cli_dir}/*").each do |plugin|
-        target = File.readlink(plugin) rescue nil
-        FileUtils.rm_f(plugin) if target&.include?("dd-extracted")
+        target = begin
+                   File.readlink(plugin)
+        rescue
+                   nil
+        end
+        FileUtils.rm(plugin) if target&.include?("dd-extracted")
       end
     end
 
@@ -94,10 +100,10 @@ cask "docker-desktop-linux" do
   end
 
   zap trash: [
+    "~/.config/systemd/user/docker-desktop.service",
     "~/.docker",
     "~/.local/share/applications/docker-desktop.desktop",
     "~/.local/share/icons/docker-desktop.png",
-    "~/.config/systemd/user/docker-desktop.service",
   ]
 
   caveats <<~EOS

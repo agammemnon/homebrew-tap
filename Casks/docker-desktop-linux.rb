@@ -42,17 +42,62 @@ cask "docker-desktop-linux" do
       desktop_content.gsub!(/^Icon=.*/, "Icon=#{Dir.home}/.local/share/icons/docker-desktop.png")
       File.write("#{staged_path}/docker-desktop.desktop", desktop_content)
     end
+
+    # Install systemd user service with corrected ExecStart path
+    systemd_user_dir = "#{Dir.home}/.config/systemd/user"
+    FileUtils.mkdir_p systemd_user_dir
+    service_source = "#{extract_dir}/usr/lib/systemd/user/docker-desktop.service"
+    if File.exist?(service_source)
+      service_content = File.read(service_source)
+      service_content.gsub!(%r{^ExecStart=.*}, "ExecStart=#{extract_dir}/opt/docker-desktop/bin/com.docker.backend")
+      File.write("#{systemd_user_dir}/docker-desktop.service", service_content)
+    end
+
+    # Install Docker CLI plugins
+    docker_cli_dir = "#{Dir.home}/.docker/cli-plugins"
+    FileUtils.mkdir_p docker_cli_dir
+    cli_plugins_dir = "#{extract_dir}/usr/lib/docker/cli-plugins"
+    if Dir.exist?(cli_plugins_dir)
+      Dir.glob("#{cli_plugins_dir}/*").each do |plugin|
+        FileUtils.ln_sf plugin, "#{docker_cli_dir}/#{File.basename(plugin)}"
+      end
+    end
+
+    # Install docker-credential-desktop
+    credential_helper = "#{extract_dir}/usr/bin/docker-credential-desktop"
+    if File.exist?(credential_helper)
+      FileUtils.ln_sf credential_helper, "#{HOMEBREW_PREFIX}/bin/docker-credential-desktop"
+    end
+  end
+
+  uninstall_preflight do
+    system "systemctl", "--user", "stop", "docker-desktop" if system("systemctl", "--user", "is-active", "--quiet", "docker-desktop")
+    system "systemctl", "--user", "disable", "docker-desktop" if system("systemctl", "--user", "is-enabled", "--quiet", "docker-desktop")
   end
 
   uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/docker-desktop.desktop")
-    FileUtils.rm("#{Dir.home}/.local/share/icons/docker-desktop.png")
+    FileUtils.rm_f("#{Dir.home}/.local/share/applications/docker-desktop.desktop")
+    FileUtils.rm_f("#{Dir.home}/.local/share/icons/docker-desktop.png")
+    FileUtils.rm_f("#{Dir.home}/.config/systemd/user/docker-desktop.service")
+    FileUtils.rm_f("#{HOMEBREW_PREFIX}/bin/docker-credential-desktop")
+
+    # Remove CLI plugin symlinks
+    docker_cli_dir = "#{Dir.home}/.docker/cli-plugins"
+    if Dir.exist?(docker_cli_dir)
+      Dir.glob("#{docker_cli_dir}/*").each do |plugin|
+        target = File.readlink(plugin) rescue nil
+        FileUtils.rm_f(plugin) if target&.include?("dd-extracted")
+      end
+    end
+
+    system "systemctl", "--user", "daemon-reload"
   end
 
   zap trash: [
     "~/.docker",
     "~/.local/share/applications/docker-desktop.desktop",
     "~/.local/share/icons/docker-desktop.png",
+    "~/.config/systemd/user/docker-desktop.service",
   ]
 
   caveats <<~EOS
@@ -68,7 +113,7 @@ cask "docker-desktop-linux" do
     To start Docker Desktop:
       docker-desktop
 
-    To manage via systemd (requires creating a service unit):
+    To manage via systemd:
       systemctl --user start docker-desktop
       systemctl --user enable docker-desktop
   EOS

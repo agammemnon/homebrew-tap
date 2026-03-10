@@ -1,6 +1,6 @@
 cask "ghostty-linux" do
-  version "1.2.3"
-  sha256 "cf239a0a9383aa9a148da2f6c6444993f871618cf4309d4db15d7be992d16725"
+  version "1.3.0"
+  sha256 "f9249820636690dd4747bcd7eb2b082d41a1c1e63a6956a7a130c401e95d22bf"
 
   url "https://github.com/pkgforge-dev/ghostty-appimage/releases/download/v#{version}/Ghostty-#{version.split("+").first}-x86_64.AppImage"
   name "Ghostty"

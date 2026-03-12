@@ -1,4 +1,4 @@
-name: Bump casks on schedule
+name: Bump casks and formulas on schedule
 
 on:
   workflow_dispatch:
@@ -38,8 +38,8 @@ jobs:
             gh pr close "$pr" --repo "${{ github.repository }}" --delete-branch || true
           done
 
-      - name: Bump outdated casks
-        run: brew bump --tap agammemnon/tap --cask --no-fork --open-pr
+      - name: Bump outdated casks and formulas
+        run: brew bump --tap agammemnon/tap --no-fork --open-pr
 
       - name: Enable auto-merge on bump PRs
         run: |

@@ -21,6 +21,8 @@ jobs:
       - name: Set up Homebrew
         id: set-up-homebrew
         uses: Homebrew/actions/setup-homebrew@master
+        with:
+          core: true
 
       - name: Tap repository
         run: brew tap agammemnon/tap

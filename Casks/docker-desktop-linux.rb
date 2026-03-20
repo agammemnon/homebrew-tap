@@ -88,9 +88,9 @@ cask "docker-desktop-linux" do
     if Dir.exist?(docker_cli_dir)
       Dir.glob("#{docker_cli_dir}/*").each do |plugin|
         target = begin
-                   File.readlink(plugin)
+          File.readlink(plugin)
         rescue
-                   nil
+          nil
         end
         FileUtils.rm(plugin) if target&.include?("dd-extracted")
       end

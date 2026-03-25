@@ -1,6 +1,6 @@
 cask "zed-linux@preview" do
-  version "0.229.0"
-  sha256 "0103ec9684c9503c2fee4444cfd48fbfa614db655afd0fcbc39cb67141b717c4"
+  version "0.230.0"
+  sha256 "d39ec42b4ffa19ed1eb2ac8eb1f6ace93c1776c10ca9099caee0614a069ec943"
 
   url "https://zed.dev/api/releases/preview/#{version}/zed-linux-x86_64.tar.gz"
   name "Zed Preview"

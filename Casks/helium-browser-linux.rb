@@ -1,6 +1,6 @@
 cask "helium-browser-linux" do
-  version "0.11.3.2"
-  sha256 "0cc832d4d1f6fa1bb30c6c92942a8da608fb2672ede0eb6051e0a3c4c096bc5b"
+  version "0.11.5.1"
+  sha256 "c33f67a9ad2853e334634cfc91630257b2425e14f87c7c61802641e7297bf27a"
 
   url "https://github.com/imputnet/helium-linux/releases/download/#{version}/helium-#{version}-x86_64_linux.tar.xz"
   name "Helium Browser"

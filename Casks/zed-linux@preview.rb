@@ -1,16 +1,16 @@
 cask "zed-linux@preview" do
-  version "0.234.0"
-  sha256 "8547bb07a48f5e0be35e66f9be7a4c734e1e99e1e9586d7a0aa8bb3c15314c86"
+  version "1.2.2-pre"
+  sha256 "0e39264285c369885ceec61821718059f239924ea1b5a1092369c13e88a39a24"
 
-  url "https://zed.dev/api/releases/preview/#{version}/zed-linux-x86_64.tar.gz"
+  url "https://github.com/zed-industries/zed/releases/download/v#{version}/zed-linux-x86_64.tar.gz"
   name "Zed Preview"
   desc "High-performance, multiplayer code editor (preview build)"
   homepage "https://zed.dev/"
 
   livecheck do
-    url "https://zed.dev/api/releases/latest?asset=zed-linux-x86_64.tar.gz&preview=1&os=linux&arch=x86_64"
-    strategy :json do |json|
-      json["version"]
+    url "https://zed.dev/api/releases/preview/latest/zed-linux-x86_64.tar.gz"
+    strategy :header_match do |all_headers|
+      all_headers.filter_map { |h| h["location"]&.match(%r{/download/v([^/]+-pre)/})&.[](1) }.first
     end
   end
 

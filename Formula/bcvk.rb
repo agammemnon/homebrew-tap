@@ -12,6 +12,8 @@ class Bcvk < Formula
   depends_on "openssl" => :build
   depends_on "pkg-config" => :build
   depends_on "rust" => :build
+  depends_on "binutils"
+  depends_on "glibc"
   depends_on :linux
 
   def install
@@ -21,7 +23,7 @@ class Bcvk < Formula
   def caveats
     <<~EOS
       bcvk requires the following runtime dependencies:
-        podman, qemu-kvm, qemu-img, virtiofsd, openssh-clients, binutils
+        podman, qemu-kvm, qemu-img, virtiofsd, openssh-clients
 
       For libvirt integration, also install:
         libvirt-client

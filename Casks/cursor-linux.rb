@@ -5,6 +5,10 @@ cask "cursor-linux" do
 
   version "3.3.27,80b138a7a0a948e1a798e9ed7867d76a1ba9a318"
 
+  on_macos do
+    sha256 :no_check
+  end
+
   on_linux do
     sha256 arm64_linux:  "65325d9b003b351ff9f7d5142752dd03a11c5c6f56d94be6edb39038a805c44e",
            x86_64_linux: "86d60015c60436bdfa47187c0aed28fac78327c493770318c534297d8672fa50"

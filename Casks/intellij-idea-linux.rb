@@ -5,6 +5,10 @@ cask "intellij-idea-linux" do
 
   version "2026.1.1,261.23567.138"
 
+  on_macos do
+    sha256 :no_check
+  end
+
   on_linux do
     sha256 x86_64_linux: "7a58d386f2a2e5a8cd7e4591657b4fe599aeac22d960c7accf5f927846507bfb",
            arm64_linux:  "8e756a0c29818b1de78d3c4381ad1a1bcf42f5fbc35bbd209c4dc8fe7bc7b570"

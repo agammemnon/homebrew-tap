@@ -5,6 +5,10 @@ cask "rubymine-linux" do
 
   version "2026.1.1,261.23567.142"
 
+  on_macos do
+    sha256 :no_check
+  end
+
   on_linux do
     sha256 x86_64_linux: "b5d4fc2f0b07182e635311ac44f570d557ca7ca674e6066c18bea4a6cc5c3c50",
            arm64_linux:  "9ecf68c6c31748f252e4a5925f4a0a3b23b283c6e0b949ddf2fd5347057d117c"

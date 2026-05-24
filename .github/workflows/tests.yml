@@ -9,6 +9,8 @@ on:
 jobs:
   test-bot:
     runs-on: ubuntu-24.04
+    env:
+      HOMEBREW_NO_SANDBOX_LINUX: 1
     permissions:
       actions: read
       checks: read

@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Set up Homebrew
         id: set-up-homebrew
-        uses: Homebrew/actions/setup-homebrew@master
+        uses: Homebrew/actions/setup-homebrew@main
         with:
           core: true
 
@@ -28,22 +28,33 @@ jobs:
         run: brew tap agammemnon/tap
 
       - name: Configure Git user
-        uses: Homebrew/actions/git-user-config@master
+        uses: Homebrew/actions/git-user-config@main
         with:
           username: ${{ github.actor }}
 
       - name: Close stale bump PRs
         run: |
-          gh pr list --repo "${{ github.repository }}" --state open --json number,headRefName \
-            --jq '.[] | select(.headRefName | startswith("bump-")) | .number' | while read -r pr; do
-            echo "Closing stale PR #$pr"
+          now=$(date +%s)
+          gh pr list --repo "${{ github.repository }}" --state open --json number,headRefName,createdAt \
+            --jq '.[] | select(.headRefName | startswith("bump-")) | [.number, .createdAt] | @tsv' | while IFS=$'\t' read -r pr created_at; do
+            created=$(date -d "$created_at" +%s)
+            age_hours=$(( (now - created) / 3600 ))
+
+            if [ "$age_hours" -lt 24 ]; then
+              echo "Keeping recent bump PR #$pr (${age_hours}h old)"
+              continue
+            fi
+
+            echo "Closing stale bump PR #$pr (${age_hours}h old)"
             gh pr close "$pr" --repo "${{ github.repository }}" --delete-branch || true
           done
 
       - name: Bump outdated casks and formulas
+        continue-on-error: true
         run: brew bump --tap agammemnon/tap --no-fork --open-pr
 
       - name: Enable auto-merge on bump PRs
+        if: always()
         run: |
           gh pr list --repo "${{ github.repository }}" --state open --json number,headRefName \
             --jq '.[] | select(.headRefName | startswith("bump-")) | .number' | while read -r pr; do

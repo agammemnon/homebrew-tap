@@ -51,7 +51,7 @@ jobs:
 
       - name: Bump outdated casks and formulas
         continue-on-error: true
-        run: brew bump --tap agammemnon/tap --no-fork --open-pr
+        run: brew bump --tap agammemnon/tap --eval-all --no-fork --open-pr --no-pull-requests
 
       - name: Enable auto-merge on bump PRs
         if: always()

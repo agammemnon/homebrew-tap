@@ -3,15 +3,15 @@ cask "intellij-idea-linux" do
        arm:   "-aarch64"
   os linux: "linux"
 
-  version "2026.1.3,261.25134.95"
+  version "2026.1.4,261.26222.65"
 
   on_macos do
     sha256 :no_check
   end
 
   on_linux do
-    sha256 x86_64_linux: "a6f049716da1d09d9e0ec1500c60bf01a5ff8a0fe2419178dd1ff2fdb2b77563",
-           arm64_linux:  "7659e791609233c3e6bf67c1bfcc86f5fa1176477ca5815ae6125b0eae84a88b"
+    sha256 x86_64_linux: "3104d85d9507ff882065e3f8eb9506402b4a8129092d2682662bb6e9c4f063fc",
+           arm64_linux:  "303645b8bad4c5c0887346618b842180a3de53b3e0b3da09fc5c501f59f78013"
   end
 
   url "https://download.jetbrains.com/idea/ideaIU-#{version.csv.first}#{arch}.tar.gz"

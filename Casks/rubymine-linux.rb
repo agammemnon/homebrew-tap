@@ -3,15 +3,15 @@ cask "rubymine-linux" do
        arm:   "-aarch64"
   os linux: "linux"
 
-  version "2026.1.3,261.25134.97"
+  version "2026.1.4,261.26222.67"
 
   on_macos do
     sha256 :no_check
   end
 
   on_linux do
-    sha256 x86_64_linux: "d0a17f2045514fc9201e950b126a8ccbd80e7f4e88203038bc457746e8e34281",
-           arm64_linux:  "922b91a7d261752d1a5053d7d5bac8d53f6293f8968609487241efbf86dd3d69"
+    sha256 x86_64_linux: "d0486d5385ca588f62ee28fe9b9bafc474989db41a609cbc49ae92d4e5b80855",
+           arm64_linux:  "a12bb5f69906556b77d6f5817407df499b2ee10cec5339d56d44b00f2f7c9ee8"
   end
 
   url "https://download.jetbrains.com/ruby/RubyMine-#{version.csv.first}#{arch}.tar.gz"

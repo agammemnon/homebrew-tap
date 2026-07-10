@@ -3,15 +3,15 @@ cask "cursor-linux" do
   file_arch = on_arch_conditional arm: "aarch64", intel: "x86_64"
   os linux: "linux"
 
-  version "3.10.20,23b9fb205fe595ea2be29da7214e19762d037fc3"
+  version "3.11.13,3f21b08f0b436a07be29fbfe00b304fa15553353"
 
   on_macos do
     sha256 :no_check
   end
 
   on_linux do
-    sha256 arm64_linux:  "a796cc80cc341af31922b71ec8ef23f3f2672a0bd84ece5949c4a19272f2722d",
-           x86_64_linux: "99b39e9bdd6277e1fa67c56157c6cff8782075655a679cb2598da1f8db6cf6fb"
+    sha256 arm64_linux:  "6677240df70842bc4ab216ffd4cd9b4721123001f62e3ed8309dcfe8b948e43b",
+           x86_64_linux: "b6733eb91f8dc36a645d67140e90b58b99786e3c9521065b3a9656097e8be501"
   end
 
   url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{file_arch}.AppImage",

@@ -3,15 +3,15 @@ cask "goland-linux" do
        arm:   "-aarch64"
   os linux: "linux"
 
-  version "2026.1.4,261.26222.72"
+  version "2026.2,262.8665.270"
 
   on_macos do
     sha256 :no_check
   end
 
   on_linux do
-    sha256 x86_64_linux: "a4749b98067eb527dad3076d0e9ff721bfc634c3f7d0e14d4251d651f330ad6d",
-           arm64_linux:  "eecf7c918d3c68a8dd44640b0e47df7958608f5156bab2e64d3626b5be50c7a7"
+    sha256 x86_64_linux: "2102b9b40a7e28cd943deeb3bfa6fe21e31c7eaacf486275289cee05532a0869",
+           arm64_linux:  "6fc3e8304178c73d99ceb3e421961bf0a302ff39d6556edfaf4314d3e66b1ee8"
   end
 
   url "https://download.jetbrains.com/go/goland-#{version.csv.first}#{arch}.tar.gz"

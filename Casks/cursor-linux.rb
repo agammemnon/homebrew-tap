@@ -10,8 +10,8 @@ cask "cursor-linux" do
   end
 
   on_linux do
-    sha256 arm64_linux:  "4db8ba0890c96482bd9647a2aff7669a83e57e66954008a3c0cbf4bd2304cc04",
-           x86_64_linux: "019d75c79d24700a98c603862d87dc6613a235850d54fb18d78de0721e634fda"
+    sha256 arm64_linux:  "febea516b4aaeda49e7c6bce5aa2f0fd89b2532dd5a1c6964723941e81ee49e3",
+           x86_64_linux: "16ed34a74bda2cd3a5f706c682db1e2f086c797c66210332ca194d17b559faa3"
   end
 
   url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{file_arch}.AppImage",

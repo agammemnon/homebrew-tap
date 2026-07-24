@@ -38,12 +38,23 @@ jobs:
         run: brew bump --tap agammemnon/tap --no-fork --open-pr
 
       - name: Enable auto-merge on bump PRs
+        # `brew bump` can update some casks before another cask fails its audit.
+        # Always process any PRs that were created before that failure.
+        if: ${{ always() && !cancelled() }}
         run: |
-          gh pr list --repo "${{ github.repository }}" --state open --json number,headRefName \
-            --jq '.[] | select(.headRefName | startswith("bump-")) | .number' | while read -r pr; do
+          failures=0
+          while read -r pr; do
             echo "Enabling auto-merge for PR #$pr"
-            gh pr merge "$pr" --repo "${{ github.repository }}" --auto --squash || true
-          done
+            if ! gh pr merge "$pr" --repo "${{ github.repository }}" --auto --squash; then
+              echo "::error::Failed to enable auto-merge for PR #$pr"
+              failures=1
+            fi
+          done < <(
+            gh pr list --repo "${{ github.repository }}" --state open \
+              --json number,headRefName,autoMergeRequest \
+              --jq '.[] | select((.headRefName | startswith("bump-")) and .autoMergeRequest == null) | .number'
+          )
+          exit "$failures"
 
   cleanup:
     needs: bump

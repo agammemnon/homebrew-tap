@@ -1,6 +1,5 @@
 cask "goland-linux" do
-  arch intel: "",
-       arm:   "-aarch64"
+  arch arm: "-aarch64"
   os linux: "linux"
 
   version "2026.2.0.1,262.8665.336"
@@ -8,7 +7,6 @@ cask "goland-linux" do
   on_macos do
     sha256 :no_check
   end
-
   on_linux do
     sha256 x86_64_linux: "9d3fe39b0d1614dc26b564796ded0a0541c9a4ce3ca6185837ba1434e302ae89",
            arm64_linux:  "b7abc7edfc6dcac829adcd441c7dd78887470faa0231c63f6b586ee5a8983311"

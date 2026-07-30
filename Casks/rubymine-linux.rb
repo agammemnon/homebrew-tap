@@ -1,6 +1,5 @@
 cask "rubymine-linux" do
-  arch intel: "",
-       arm:   "-aarch64"
+  arch arm: "-aarch64"
   os linux: "linux"
 
   version "2026.2,262.8665.308"
@@ -8,7 +7,6 @@ cask "rubymine-linux" do
   on_macos do
     sha256 :no_check
   end
-
   on_linux do
     sha256 x86_64_linux: "93e4f940308872ea875ab8e1a0219cca6fd0f6fe1806f89a720f6b9cd1412113",
            arm64_linux:  "d93ead8533180257dbeb224a6e9b88c95b63ec07ff3f7023400565d7a1f7e673"

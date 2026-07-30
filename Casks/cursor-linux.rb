@@ -8,7 +8,6 @@ cask "cursor-linux" do
   on_macos do
     sha256 :no_check
   end
-
   on_linux do
     sha256 arm64_linux:  "54242d3ab18d2633ad7fa7f44e8f6fc4fff88e9e25ec3dc1169692d1514679df",
            x86_64_linux: "c93abb12a31d6b66bd81a0604933867b7dbb204585ea268d1c734e8dc58e0cd0"

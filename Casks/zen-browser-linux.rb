@@ -1,6 +1,6 @@
 cask "zen-browser-linux" do
-  version "1.21.9"
-  sha256 "f83b1467c421a2d0d53eebd2c24c747b1836f02a0d043dd8b8862392adbf6e01"
+  version "1.21.10"
+  sha256 "6a134befd30e9618f4d7e50dddb3ae721de117bab728a97c75f9e5c2123a1d0f"
 
   url "https://github.com/zen-browser/desktop/releases/download/#{version}b/zen.linux-x86_64.tar.xz"
   name "Zen Browser"

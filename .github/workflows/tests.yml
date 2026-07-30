@@ -28,7 +28,6 @@ jobs:
         with:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
           key: ubuntu-24.04-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
-          restore-keys: ubuntu-24.04-rubygems-
 
       - run: brew test-bot --only-cleanup-before
 

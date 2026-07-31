@@ -1,6 +1,6 @@
 cask "peekcal" do
-  version "1.2"
-  sha256 "f93200f9ebbeded0022da9451b460512c3c52ab2078219cbce71759f31a346f0"
+  version "1.3"
+  sha256 "d4885bfa46f1c6fb00415d70f6902203851c279c2cd9c87511082c7f4cc35523"
 
   url "https://peekcal.nodegroup.ca/PeekCal-#{version}.zip"
   name "PeekCal"

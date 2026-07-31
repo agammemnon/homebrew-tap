@@ -1,6 +1,6 @@
 # Agamemnon Homebrew Tap
 
-A custom WIP Homebrew tap providing formulas and casks for Linux applications, with a focus on vendor tools, privacy-focused browsers, modern terminal emulators, and development tools. Features automated CI/CD workflows for bottle building and version updates.
+A custom WIP Homebrew tap providing formulas and casks for Linux and macOS applications, with a focus on vendor tools, privacy-focused browsers, modern terminal emulators, and development tools. Features automated CI/CD workflows for bottle building and version updates.
 
 ## Installation
 
@@ -61,11 +61,18 @@ Casks provide pre-built GUI applications with desktop integration.
   brew install --cask agammemnon/tap/zed-linux
   ```
 
+#### macOS Apps
+
+- **peekcal** - Menu bar view of a shared Google Calendar work week (Apple silicon)
+  ```bash
+  brew install --cask agammemnon/tap/peekcal
+  ```
+
 ## Features
 
 - **Automated Bottle Building**: Formulas are automatically built and bottled via GitHub Actions for faster installation
 - **Version Updates**: Automated workflows check for new releases and update casks
-- **Desktop Integration**: All GUI applications include proper `.desktop` files and icons
+- **Desktop Integration**: Linux GUI applications include proper `.desktop` files and icons
 - **systemd Support**: Services for system-level tools like asusctl
 
 ## Usage Tips
@@ -93,7 +100,8 @@ Run `brew info <package-name>` to view detailed post-install instructions.
 
 ## Requirements
 
-- Homebrew on Linux
+- Homebrew on Linux, or macOS 13 or newer for PeekCal
+- Apple silicon (for PeekCal)
 - systemd (for asusctl)
 - Some packages may require additional system dependencies (automatically installed via Homebrew)
 

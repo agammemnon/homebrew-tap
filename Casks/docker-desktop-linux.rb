@@ -1,5 +1,5 @@
 cask "docker-desktop-linux" do
-  version "4.86.0,236216"
+  version "4.86.0"
   sha256 :no_check
 
   url "https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm"
@@ -9,7 +9,7 @@ cask "docker-desktop-linux" do
 
   livecheck do
     url "https://desktop.docker.com/linux/main/amd64/appcast.xml"
-    strategy :sparkle
+    strategy :sparkle, &:short_version
   end
 
   binary "#{staged_path}/dd-extracted/opt/docker-desktop/bin/docker-desktop", target: "docker-desktop"

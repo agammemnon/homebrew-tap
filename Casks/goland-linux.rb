@@ -8,8 +8,8 @@ cask "goland-linux" do
     sha256 :no_check
   end
   on_linux do
-    sha256 x86_64_linux: "44a2cb6dda302340ade6e52adfff291c9fd62074c53d312b7f4268ddaa0a2159",
-           arm64_linux:  "0ff8085bb9c896ac3a478fa0d63b21f991c7f37e900598abaa5a855f8c127712"
+    sha256 arm64_linux:  "0ff8085bb9c896ac3a478fa0d63b21f991c7f37e900598abaa5a855f8c127712",
+           x86_64_linux: "44a2cb6dda302340ade6e52adfff291c9fd62074c53d312b7f4268ddaa0a2159"
   end
 
   url "https://download.jetbrains.com/go/goland-#{version.csv.first}#{arch}.tar.gz"

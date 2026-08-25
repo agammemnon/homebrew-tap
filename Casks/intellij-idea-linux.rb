@@ -8,8 +8,8 @@ cask "intellij-idea-linux" do
     sha256 :no_check
   end
   on_linux do
-    sha256 x86_64_linux: "dac2021204c8bf3bd8d66567a1ae36a341da0050b6006c32d42006c6577eb29a",
-           arm64_linux:  "110bc988fa52a702e25a8d57cc50eb0150e8f64641fa70a633f9f3798bfab6eb"
+    sha256 arm64_linux:  "110bc988fa52a702e25a8d57cc50eb0150e8f64641fa70a633f9f3798bfab6eb",
+           x86_64_linux: "dac2021204c8bf3bd8d66567a1ae36a341da0050b6006c32d42006c6577eb29a"
   end
 
   url "https://download.jetbrains.com/idea/ideaIU-#{version.csv.first}#{arch}.tar.gz"

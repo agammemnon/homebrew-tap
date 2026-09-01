@@ -1,5 +1,5 @@
 cask "docker-desktop-linux" do
-  version "4.88.1"
+  version "4.89.0"
   sha256 :no_check
 
   url "https://desktop.docker.com/linux/main/amd64/docker-desktop-x86_64.rpm"

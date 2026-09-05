@@ -14,18 +14,18 @@ cask "helium-browser-linux" do
 
   binary "helium-#{version}-x86_64_linux/helium", target: "helium"
 
-  preflight do
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
+  preflight_steps do
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
   end
 
-  postflight do
-    File.write("#{Dir.home}/.local/share/applications/helium.desktop", <<~EOS)
+  postflight_steps do
+    write_file ".local/share/applications/helium.desktop", <<~EOS, base: :home
       [Desktop Entry]
       Name=Helium Browser
       Comment=Open-source browser based on ungoogled-chromium
       GenericName=Web Browser
-      Exec=#{HOMEBREW_PREFIX}/bin/helium %U
+      Exec={{HOMEBREW_PREFIX}}/bin/helium %U
       Icon=helium
       Type=Application
       StartupNotify=true
@@ -36,15 +36,14 @@ cask "helium-browser-linux" do
 
       [Desktop Action new-private-window]
       Name=New Private Window
-      Exec=#{HOMEBREW_PREFIX}/bin/helium --incognito
+      Exec={{HOMEBREW_PREFIX}}/bin/helium --incognito
     EOS
-    FileUtils.cp("#{staged_path}/helium-#{version}-x86_64_linux/product_logo_256.png",
-                 "#{Dir.home}/.local/share/icons/helium.png")
+    copy "helium-{{version}}-x86_64_linux/product_logo_256.png", ".local/share/icons/helium.png", target_base: :home
   end
 
-  uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/helium.desktop")
-    FileUtils.rm("#{Dir.home}/.local/share/icons/helium.png")
+  uninstall_postflight_steps do
+    remove ".local/share/applications/helium.desktop", base: :home
+    remove ".local/share/icons/helium.png", base: :home
   end
 
   zap trash: [

@@ -12,8 +12,7 @@ cask "antigravity-linux" do
            x86_64_linux: "5232a4048ff4fa15685d9a981ba4fba573e297f3efc9b76f638e794baf775725"
   end
 
-  url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz",
-      verified: "edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/"
+  url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz"
   name "Google Antigravity"
   desc "AI Coding Agent IDE"
   homepage "https://antigravity.google/"
@@ -37,22 +36,24 @@ cask "antigravity-linux" do
   artifact "antigravity.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
+  preflight_steps do
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
 
-    # Copy icon from extracted archive
-    icon_path = "Antigravity/resources/app/out/vs/workbench/contrib/antigravityCustomAppIcon"
-    icon_source = "#{staged_path}/#{icon_path}/browser/media/antigravity/antigravity.png"
-    FileUtils.cp icon_source, "#{staged_path}/antigravity.png" if File.exist?(icon_source)
+    if_path_exists "Antigravity/resources/app/out/vs/workbench/contrib/antigravityCustomAppIcon/" \
+                   "browser/media/antigravity/antigravity.png" do
+      copy "Antigravity/resources/app/out/vs/workbench/contrib/antigravityCustomAppIcon/" \
+           "browser/media/antigravity/antigravity.png",
+           "antigravity.png"
+    end
 
-    File.write("#{staged_path}/antigravity.desktop", <<~EOS)
+    write_file "antigravity.desktop", <<~EOS
       [Desktop Entry]
       Name=Antigravity
       Comment=AI Coding Agent IDE
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/antigravity %F
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
+      Exec={{HOMEBREW_PREFIX}}/bin/antigravity %F
+      Icon=antigravity
       Type=Application
       StartupNotify=false
       StartupWMClass=Antigravity
@@ -63,12 +64,14 @@ cask "antigravity-linux" do
 
       [Desktop Action new-empty-window]
       Name=New Empty Window
-      Exec=#{HOMEBREW_PREFIX}/bin/antigravity --new-window %F
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png
+      Exec={{HOMEBREW_PREFIX}}/bin/antigravity --new-window %F
+      Icon=antigravity
     EOS
 
-    # Create a placeholder icon if extraction fails
-    FileUtils.touch "#{staged_path}/antigravity.png" unless File.exist?("#{staged_path}/antigravity.png")
+    # Keep a placeholder when the archive has no icon.
+    unless_path_exists "antigravity.png" do
+      touch "antigravity.png"
+    end
   end
 
   zap trash: [

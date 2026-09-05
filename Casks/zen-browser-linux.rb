@@ -14,18 +14,18 @@ cask "zen-browser-linux" do
 
   binary "zen/zen"
 
-  preflight do
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
+  preflight_steps do
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
   end
 
-  postflight do
-    File.write("#{Dir.home}/.local/share/applications/zen.desktop", <<~EOS)
+  postflight_steps do
+    write_file ".local/share/applications/zen.desktop", <<~EOS, base: :home
       [Desktop Entry]
       Name=Zen Browser
       Comment=Privacy-focused web browser based on Firefox
       GenericName=Web Browser
-      Exec=#{HOMEBREW_PREFIX}/bin/zen %U
+      Exec={{HOMEBREW_PREFIX}}/bin/zen %U
       Icon=zen
       Type=Application
       StartupNotify=true
@@ -33,13 +33,12 @@ cask "zen-browser-linux" do
       MimeType=text/html;text/xml;application/xhtml+xml;application/xml;application/rss+xml;application/rdf+xml;image/gif;image/jpeg;image/png;x-scheme-handler/http;x-scheme-handler/https;x-scheme-handler/ftp;x-scheme-handler/chrome;video/webm;application/x-xpinstall;
       StartupWMClass=zen
     EOS
-    FileUtils.cp("#{staged_path}/zen/browser/chrome/icons/default/default128.png",
-                 "#{Dir.home}/.local/share/icons/zen.png")
+    copy "zen/browser/chrome/icons/default/default128.png", ".local/share/icons/zen.png", target_base: :home
   end
 
-  uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/zen.desktop")
-    FileUtils.rm("#{Dir.home}/.local/share/icons/zen.png")
+  uninstall_postflight_steps do
+    remove ".local/share/applications/zen.desktop", base: :home
+    remove ".local/share/icons/zen.png", base: :home
   end
 
   zap trash: [

@@ -18,85 +18,61 @@ cask "docker-desktop-linux" do
   artifact "docker-desktop.png",
            target: "#{Dir.home}/.local/share/icons/docker-desktop.png"
 
-  preflight do
-    # Extract RPM contents
-    rpm_file = "#{staged_path}/docker-desktop-x86_64.rpm"
-    extract_dir = "#{staged_path}/dd-extracted"
-    FileUtils.mkdir_p extract_dir
-    system "cd '#{extract_dir}' && rpm2cpio '#{rpm_file}' | cpio -idmv"
-    FileUtils.rm rpm_file
+  preflight_steps do
+    # Keep extraction declarative and stop if either command fails.
+    mkdir_p "dd-extracted"
+    run "rpm2cpio", args:        ["{{staged_path}}/docker-desktop-x86_64.rpm"],
+                    stdout_path: "docker-desktop.cpio"
+    run "cpio", args: ["-idmv"],
+                stdin_path: "docker-desktop.cpio", chdir: "dd-extracted"
+    remove ["docker-desktop-x86_64.rpm", "docker-desktop.cpio"]
 
-    # Set up desktop integration
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons"
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
 
-    # Copy icon
-    icon_source = "#{extract_dir}/opt/docker-desktop/share/icon.original.png"
-    FileUtils.cp icon_source, "#{staged_path}/docker-desktop.png" if File.exist?(icon_source)
-
-    # Use bundled desktop file with modified paths
-    bundled_desktop = "#{extract_dir}/usr/share/applications/docker-desktop.desktop"
-    if File.exist?(bundled_desktop)
-      desktop_content = File.read(bundled_desktop)
-      desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/docker-desktop")
-      desktop_content.gsub!(/^Icon=.*/, "Icon=#{Dir.home}/.local/share/icons/docker-desktop.png")
-      File.write("#{staged_path}/docker-desktop.desktop", desktop_content)
+    if_path_exists "dd-extracted/opt/docker-desktop/share/icon.original.png" do
+      copy "dd-extracted/opt/docker-desktop/share/icon.original.png", "docker-desktop.png"
     end
 
-    # Install systemd user service with corrected ExecStart path
-    systemd_user_dir = "#{Dir.home}/.config/systemd/user"
-    FileUtils.mkdir_p systemd_user_dir
-    service_source = "#{extract_dir}/usr/lib/systemd/user/docker-desktop.service"
-    if File.exist?(service_source)
-      service_content = File.read(service_source)
-      service_content.gsub!(/^ExecStart=.*/, "ExecStart=#{extract_dir}/opt/docker-desktop/bin/com.docker.backend")
-      File.write("#{systemd_user_dir}/docker-desktop.service", service_content)
+    if_path_exists "dd-extracted/usr/share/applications/docker-desktop.desktop" do
+      copy "dd-extracted/usr/share/applications/docker-desktop.desktop", "docker-desktop.desktop"
+      inreplace "docker-desktop.desktop", /^Exec=.*/, "Exec={{HOMEBREW_PREFIX}}/bin/docker-desktop",
+                audit_result: false
+      inreplace "docker-desktop.desktop", /^Icon=.*/, "Icon=docker-desktop", audit_result: false
     end
 
-    # Install Docker CLI plugins
-    docker_cli_dir = "#{Dir.home}/.docker/cli-plugins"
-    FileUtils.mkdir_p docker_cli_dir
-    cli_plugins_dir = "#{extract_dir}/usr/lib/docker/cli-plugins"
-    if Dir.exist?(cli_plugins_dir)
-      Dir.glob("#{cli_plugins_dir}/*").each do |plugin|
-        FileUtils.ln_sf plugin, "#{docker_cli_dir}/#{File.basename(plugin)}"
-      end
+    mkdir_p ".config/systemd/user", base: :home
+    if_path_exists "dd-extracted/usr/lib/systemd/user/docker-desktop.service" do
+      copy "dd-extracted/usr/lib/systemd/user/docker-desktop.service",
+           ".config/systemd/user/docker-desktop.service", target_base: :home
+      inreplace ".config/systemd/user/docker-desktop.service", /^ExecStart=.*/,
+                "ExecStart={{staged_path}}/dd-extracted/opt/docker-desktop/bin/com.docker.backend",
+                base: :home, audit_result: false
     end
 
-    # Install docker-credential-desktop
-    credential_helper = "#{extract_dir}/usr/bin/docker-credential-desktop"
-    if File.exist?(credential_helper)
-      FileUtils.ln_sf credential_helper, "#{HOMEBREW_PREFIX}/bin/docker-credential-desktop"
+    mkdir_p ".docker/cli-plugins", base: :home
+    symlink "dd-extracted/usr/lib/docker/cli-plugins/*", ".docker/cli-plugins",
+            target_base: :home, source_glob: true, overwrite: true
+
+    if_path_exists "dd-extracted/usr/bin/docker-credential-desktop" do
+      symlink "dd-extracted/usr/bin/docker-credential-desktop", "bin/docker-credential-desktop",
+              target_base: :homebrew_prefix, overwrite: true
     end
   end
 
-  uninstall_preflight do
-    system "systemctl", "--user", "stop", "docker-desktop" if system("systemctl", "--user", "is-active", "--quiet",
-                                                                     "docker-desktop")
-    system "systemctl", "--user", "disable", "docker-desktop" if system("systemctl", "--user", "is-enabled",
-                                                                        "--quiet", "docker-desktop")
+  uninstall_preflight_steps do
+    # Stopping an inactive service or disabling a missing unit is harmless.
+    run "systemctl", args: ["--user", "stop", "docker-desktop"], must_succeed: false
+    run "systemctl", args: ["--user", "disable", "docker-desktop"], must_succeed: false
   end
 
-  uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/docker-desktop.desktop")
-    FileUtils.rm("#{Dir.home}/.local/share/icons/docker-desktop.png")
-    FileUtils.rm("#{Dir.home}/.config/systemd/user/docker-desktop.service")
-    FileUtils.rm("#{HOMEBREW_PREFIX}/bin/docker-credential-desktop")
-
-    # Remove CLI plugin symlinks
-    docker_cli_dir = "#{Dir.home}/.docker/cli-plugins"
-    if Dir.exist?(docker_cli_dir)
-      Dir.glob("#{docker_cli_dir}/*").each do |plugin|
-        target = begin
-          File.readlink(plugin)
-        rescue
-          nil
-        end
-        FileUtils.rm(plugin) if target&.include?("dd-extracted")
-      end
-    end
-
-    system "systemctl", "--user", "daemon-reload"
+  uninstall_postflight_steps do
+    remove ".local/share/applications/docker-desktop.desktop", base: :home
+    remove ".local/share/icons/docker-desktop.png", base: :home
+    remove ".config/systemd/user/docker-desktop.service", base: :home
+    remove "bin/docker-credential-desktop", base: :homebrew_prefix
+    remove ".docker/cli-plugins/*", base: :home, symlink_target_contains: "dd-extracted"
+    run "systemctl", args: ["--user", "daemon-reload"], must_succeed: false
   end
 
   zap trash: [

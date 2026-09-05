@@ -13,8 +13,7 @@ cask "cursor-linux" do
            x86_64_linux: "367176c637da6abbcf558611d93ae86f1dcdf064027f10a2e5befa53dfe45038"
   end
 
-  url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{file_arch}.AppImage",
-      verified: "downloads.cursor.com/"
+  url "https://downloads.cursor.com/production/#{version.csv.second}/linux/#{arch}/Cursor-#{version.csv.first}-#{file_arch}.AppImage"
   name "Cursor"
   desc "Write, edit, and chat about your code with AI"
   homepage "https://www.cursor.com/"
@@ -30,7 +29,7 @@ cask "cursor-linux" do
     end
   end
 
-  binary "Cursor-#{version.csv.first}-#{file_arch}.AppImage", target: "cursor"
+  binary "Cursor.AppImage", target: "cursor"
   bash_completion "#{staged_path}/squashfs-root/usr/share/cursor/resources/completions/bash/cursor"
   zsh_completion  "#{staged_path}/squashfs-root/usr/share/cursor/resources/completions/zsh/_cursor"
   artifact "cursor.desktop",
@@ -38,28 +37,26 @@ cask "cursor-linux" do
   artifact "cursor.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/cursor.png"
 
-  preflight do
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/icons/hicolor/512x512/apps"
+  preflight_steps do
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
 
-    # Make AppImage executable
-    appimage_name = "Cursor-#{version.csv.first}-#{file_arch}.AppImage"
-    FileUtils.chmod "+x", "#{staged_path}/#{appimage_name}"
+    # Normalise the architecture- and version-specific filename before extraction.
+    move "Cursor-*.AppImage", "Cursor.AppImage", source_glob: true
+    set_permissions "Cursor.AppImage", "+x"
+    run "Cursor.AppImage", args: ["--appimage-extract"], base: :staged_path, chdir: "."
 
-    # Extract AppImage contents to get resources (icon, completions, etc.)
-    system "#{staged_path}/#{appimage_name}", "--appimage-extract", chdir: staged_path
+    if_path_exists "squashfs-root/usr/share/icons/hicolor/512x512/apps/cursor.png" do
+      copy "squashfs-root/usr/share/icons/hicolor/512x512/apps/cursor.png", "cursor.png"
+    end
 
-    # Copy icon from extracted AppImage
-    icon_source = "#{staged_path}/squashfs-root/usr/share/icons/hicolor/512x512/apps/cursor.png"
-    FileUtils.cp icon_source, "#{staged_path}/cursor.png" if File.exist?(icon_source)
-
-    File.write("#{staged_path}/cursor.desktop", <<~EOS)
+    write_file "cursor.desktop", <<~EOS
       [Desktop Entry]
       Name=Cursor
       Comment=AI-first coding environment
       GenericName=Text Editor
-      Exec=#{HOMEBREW_PREFIX}/bin/cursor %F
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/cursor.png
+      Exec={{HOMEBREW_PREFIX}}/bin/cursor %F
+      Icon=cursor
       Type=Application
       StartupNotify=false
       StartupWMClass=Cursor
@@ -70,12 +67,14 @@ cask "cursor-linux" do
 
       [Desktop Action new-empty-window]
       Name=New Empty Window
-      Exec=#{HOMEBREW_PREFIX}/bin/cursor --new-window %F
-      Icon=#{Dir.home}/.local/share/icons/hicolor/512x512/apps/cursor.png
+      Exec={{HOMEBREW_PREFIX}}/bin/cursor --new-window %F
+      Icon=cursor
     EOS
 
-    # Create a placeholder icon if extraction fails
-    FileUtils.touch "#{staged_path}/cursor.png" unless File.exist?("#{staged_path}/cursor.png")
+    # Keep a placeholder when the extracted image has no icon.
+    unless_path_exists "cursor.png" do
+      touch "cursor.png"
+    end
   end
 
   zap trash: [

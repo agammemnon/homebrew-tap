@@ -14,26 +14,26 @@ cask "zed-linux" do
 
   binary "zed.app/bin/zed"
 
-  preflight do
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/icons")
+  preflight_steps do
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons", base: :home
   end
 
-  postflight do
-    # Read and modify the existing desktop file to point to Homebrew binary
-    desktop_content = File.read("#{staged_path}/zed.app/share/applications/dev.zed.Zed.desktop")
-    desktop_content.gsub!(/^TryExec=.*/, "TryExec=#{HOMEBREW_PREFIX}/bin/zed")
-    desktop_content.gsub!(/^Exec=zed/, "Exec=#{HOMEBREW_PREFIX}/bin/zed")
-    desktop_content.gsub!(/^Icon=.*/, "Icon=zed")
-    File.write("#{Dir.home}/.local/share/applications/dev.zed.Zed.desktop", desktop_content)
-
-    FileUtils.cp("#{staged_path}/zed.app/share/icons/hicolor/512x512/apps/zed.png",
-                 "#{Dir.home}/.local/share/icons/zed.png")
+  postflight_steps do
+    copy "zed.app/share/applications/dev.zed.Zed.desktop",
+         ".local/share/applications/dev.zed.Zed.desktop", target_base: :home
+    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^TryExec=.*/,
+              "TryExec={{HOMEBREW_PREFIX}}/bin/zed", base: :home, audit_result: false
+    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^Exec=zed/,
+              "Exec={{HOMEBREW_PREFIX}}/bin/zed", base: :home, audit_result: false
+    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^Icon=.*/, "Icon=zed",
+              base: :home, audit_result: false
+    copy "zed.app/share/icons/hicolor/512x512/apps/zed.png", ".local/share/icons/zed.png", target_base: :home
   end
 
-  uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/dev.zed.Zed.desktop")
-    FileUtils.rm("#{Dir.home}/.local/share/icons/zed.png")
+  uninstall_postflight_steps do
+    remove ".local/share/applications/dev.zed.Zed.desktop", base: :home
+    remove ".local/share/icons/zed.png", base: :home
   end
 
   zap trash: [

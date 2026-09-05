@@ -16,38 +16,29 @@ cask "google-chrome-linux" do
 
   binary "#{staged_path}/chrome-extracted/opt/google/chrome/google-chrome", target: "google-chrome"
 
-  preflight do
-    # Extract RPM contents
-    rpm_file = "#{staged_path}/google-chrome-stable_current_x86_64.rpm"
+  preflight_steps do
+    mkdir_p "chrome-extracted"
+    run "rpm2cpio", args:        ["{{staged_path}}/google-chrome-stable_current_x86_64.rpm"],
+                    stdout_path: "google-chrome.cpio"
+    run "cpio", args: ["-idmv"],
+                stdin_path: "google-chrome.cpio", chdir: "chrome-extracted"
+    remove ["google-chrome-stable_current_x86_64.rpm", "google-chrome.cpio"]
 
-    # Create extraction directory
-    extract_dir = "#{staged_path}/chrome-extracted"
-    FileUtils.mkdir_p extract_dir
+    mkdir_p ".local/share/applications", base: :home
 
-    # Extract RPM using rpm2cpio and cpio
-    system "cd '#{extract_dir}' && rpm2cpio '#{rpm_file}' | cpio -idmv"
-
-    # Remove the original RPM to save space
-    FileUtils.rm rpm_file
-
-    # Set up desktop integration
-    FileUtils.mkdir_p "#{Dir.home}/.local/share/applications"
-
-    # Check if bundled desktop file exists
-    bundled_desktop = "#{extract_dir}/usr/share/applications/google-chrome.desktop"
-    if File.exist?(bundled_desktop)
-      # Use bundled desktop file and modify Exec path
-      desktop_content = File.read(bundled_desktop)
-      desktop_content.gsub!(/^Exec=.*/, "Exec=#{HOMEBREW_PREFIX}/bin/google-chrome %U")
-      File.write("#{Dir.home}/.local/share/applications/google-chrome.desktop", desktop_content)
-    else
-      # Fallback to custom desktop file
-      File.write("#{Dir.home}/.local/share/applications/google-chrome.desktop", <<~EOS)
+    if_path_exists "chrome-extracted/usr/share/applications/google-chrome.desktop" do
+      copy "chrome-extracted/usr/share/applications/google-chrome.desktop",
+           ".local/share/applications/google-chrome.desktop", target_base: :home
+      inreplace ".local/share/applications/google-chrome.desktop", /^Exec=.*/,
+                "Exec={{HOMEBREW_PREFIX}}/bin/google-chrome %U", base: :home, audit_result: false
+    end
+    unless_path_exists "chrome-extracted/usr/share/applications/google-chrome.desktop" do
+      write_file ".local/share/applications/google-chrome.desktop", <<~EOS, base: :home
         [Desktop Entry]
         Name=Google Chrome
         Comment=Access the Internet
         GenericName=Web Browser
-        Exec=#{HOMEBREW_PREFIX}/bin/google-chrome %U
+        Exec={{HOMEBREW_PREFIX}}/bin/google-chrome %U
         Icon=google-chrome
         Type=Application
         StartupNotify=true
@@ -59,8 +50,8 @@ cask "google-chrome-linux" do
     end
   end
 
-  uninstall_postflight do
-    FileUtils.rm("#{Dir.home}/.local/share/applications/google-chrome.desktop")
+  uninstall_postflight_steps do
+    remove ".local/share/applications/google-chrome.desktop", base: :home
   end
 
   zap trash: [

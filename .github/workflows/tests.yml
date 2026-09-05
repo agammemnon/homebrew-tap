@@ -9,8 +9,6 @@ on:
 jobs:
   test-bot:
     runs-on: ubuntu-24.04
-    env:
-      HOMEBREW_NO_SANDBOX_LINUX: 1
     permissions:
       actions: read
       checks: read
@@ -24,7 +22,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Cache Homebrew Bundler RubyGems
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ steps.set-up-homebrew.outputs.gems-path }}
           key: ubuntu-24.04-rubygems-${{ steps.set-up-homebrew.outputs.gems-hash }}
@@ -39,7 +37,7 @@ jobs:
 
       - name: Upload bottles as artifact
         if: always() && github.event_name == 'pull_request'
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: bottles
           path: '*.bottle.*'

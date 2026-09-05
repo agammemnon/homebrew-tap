@@ -33,22 +33,25 @@ cask "rubymine-linux" do
   auto_updates false
   conflicts_with cask: "jetbrains-toolbox-linux"
 
-  binary "#{HOMEBREW_PREFIX}/Caskroom/rubymine-linux/#{version}/RubyMine-#{version.csv.first}/bin/rubymine"
+  binary "rubymine/bin/rubymine"
   artifact "jetbrains-rubymine.desktop",
            target: "#{Dir.home}/.local/share/applications/jetbrains-rubymine.desktop"
-  artifact "RubyMine-#{version.csv.first}/bin/rubymine.svg",
+  artifact "rubymine/bin/rubymine.svg",
            target: "#{Dir.home}/.local/share/icons/hicolor/scalable/apps/rubymine.svg"
 
-  preflight do
-    File.write("#{staged_path}/RubyMine-#{version.csv.first}/bin/rubymine64.vmoptions", "-Dide.no.platform.update=true\n", mode: "a+")
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/applications")
-    FileUtils.mkdir_p("#{Dir.home}/.local/share/icons/hicolor/scalable/apps")
-    File.write("#{staged_path}/jetbrains-rubymine.desktop", <<~EOS)
+  preflight_steps do
+    # Normalise the versioned directory before referring to it in declarative steps.
+    move "RubyMine-*", "rubymine", source_glob: true
+    touch "rubymine/bin/rubymine64.vmoptions"
+    inreplace "rubymine/bin/rubymine64.vmoptions", /\z/, "-Dide.no.platform.update=true\n"
+    mkdir_p ".local/share/applications", base: :home
+    mkdir_p ".local/share/icons/hicolor/scalable/apps", base: :home
+    write_file "jetbrains-rubymine.desktop", <<~EOS
       [Desktop Entry]
       Version=1.0
       Name=RubyMine
       Comment=A Ruby and Rails IDE
-      Exec=#{HOMEBREW_PREFIX}/bin/rubymine %u
+      Exec={{HOMEBREW_PREFIX}}/bin/rubymine %u
       Icon=rubymine
       Type=Application
       Categories=Development;IDE;
@@ -59,8 +62,9 @@ cask "rubymine-linux" do
     EOS
   end
 
-  postflight do
-    system "/usr/bin/xdg-icon-resource", "forceupdate"
+  postflight_steps do
+    run "/usr/bin/xdg-icon-resource", args: ["forceupdate"], must_succeed: false,
+                                  writable_paths: [".local/share/icons"], writable_base: :home
   end
 
   zap trash: [

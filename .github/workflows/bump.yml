@@ -35,12 +35,50 @@ jobs:
           username: ${{ github.actor }}
 
       - name: Bump outdated casks and formulas
-        run: brew bump --tap agammemnon/tap --no-fork --open-pr
+        # peekcal is excluded: its audit needs plutil, which only exists on
+        # macOS. It is bumped by the bump-macos job instead.
+        run: |
+          mapfile -t packages < <(
+            brew tap-info agammemnon/tap --json |
+              jq -r '.[0].formula_names[], .[0].cask_tokens[]' |
+              grep -v '/peekcal$'
+          )
+          brew bump --no-fork --open-pr "${packages[@]}"
 
+  bump-macos:
+    runs-on: macos-latest
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_ENV_HINTS: 1
+      HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.PAT_TOKEN }}
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+
+      - name: Tap repository
+        run: |
+          brew tap agammemnon/tap
+          brew trust --tap agammemnon/tap
+
+      - name: Configure Git user
+        uses: Homebrew/actions/git-user-config@main
+        with:
+          username: ${{ github.actor }}
+
+      - name: Bump macOS-only casks
+        run: brew bump --no-fork --open-pr agammemnon/tap/peekcal
+
+  automerge:
+    needs: [bump, bump-macos]
+    # `brew bump` can update some casks before another cask fails its audit.
+    # Always process any PRs that were created before that failure.
+    if: ${{ always() && !cancelled() }}
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+    steps:
       - name: Enable auto-merge on bump PRs
-        # `brew bump` can update some casks before another cask fails its audit.
-        # Always process any PRs that were created before that failure.
-        if: ${{ always() && !cancelled() }}
         run: |
           failures=0
           while read -r pr; do
@@ -57,7 +95,7 @@ jobs:
           exit "$failures"
 
   cleanup:
-    needs: bump
+    needs: automerge
     if: always()
     runs-on: ubuntu-latest
     steps:

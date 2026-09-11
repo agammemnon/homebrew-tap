@@ -3,14 +3,8 @@ cask "antigravity-linux" do
   os linux: "linux"
 
   version "1.23.2,4781536860569600"
-
-  on_macos do
-    sha256 :no_check
-  end
-  on_linux do
-    sha256 arm64_linux:  "64d11085f17edc691adbe8952d59887f257d58448705dc2a19dfa23890d36df1",
-           x86_64_linux: "5232a4048ff4fa15685d9a981ba4fba573e297f3efc9b76f638e794baf775725"
-  end
+  sha256 arm64_linux:  "64d11085f17edc691adbe8952d59887f257d58448705dc2a19dfa23890d36df1",
+         x86_64_linux: "5232a4048ff4fa15685d9a981ba4fba573e297f3efc9b76f638e794baf775725"
 
   url "https://edgedl.me.gvt1.com/edgedl/release2/j0qc3/antigravity/stable/#{version.csv.first}-#{version.csv.second}/linux-#{arch}/Antigravity.tar.gz"
   name "Google Antigravity"

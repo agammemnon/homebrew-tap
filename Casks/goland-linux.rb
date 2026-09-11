@@ -3,14 +3,8 @@ cask "goland-linux" do
   os linux: "linux"
 
   version "2026.2.2.1,262.10315.160"
-
-  on_macos do
-    sha256 :no_check
-  end
-  on_linux do
-    sha256 arm64_linux:  "27140b69745be6738a590fd9ae90680e8b626ae6a1219cbe56ebaa667c587f2d",
-           x86_64_linux: "10d27af7d6174fbf7c8e94d0415a45c13be586f5db425c10310c44df35f15471"
-  end
+  sha256 arm64_linux:  "27140b69745be6738a590fd9ae90680e8b626ae6a1219cbe56ebaa667c587f2d",
+         x86_64_linux: "10d27af7d6174fbf7c8e94d0415a45c13be586f5db425c10310c44df35f15471"
 
   url "https://download.jetbrains.com/go/goland-#{version.csv.first}#{arch}.tar.gz"
   name "GoLand"

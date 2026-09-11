@@ -3,14 +3,8 @@ cask "intellij-idea-linux" do
   os linux: "linux"
 
   version "2026.2.2,262.10315.125"
-
-  on_macos do
-    sha256 :no_check
-  end
-  on_linux do
-    sha256 arm64_linux:  "04baba6fb1034aebfbf86e8b55186c818b93dbbbe131012975718ff7f70740f5",
-           x86_64_linux: "f1cc5329a7adf3ab3bd8886744103f7d3bcf1ca12e699762ecd9bffe57335f8b"
-  end
+  sha256 arm64_linux:  "04baba6fb1034aebfbf86e8b55186c818b93dbbbe131012975718ff7f70740f5",
+         x86_64_linux: "f1cc5329a7adf3ab3bd8886744103f7d3bcf1ca12e699762ecd9bffe57335f8b"
 
   url "https://download.jetbrains.com/idea/ideaIU-#{version.csv.first}#{arch}.tar.gz"
   name "IntelliJ IDEA Ultimate"

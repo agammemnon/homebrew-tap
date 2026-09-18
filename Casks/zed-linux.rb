@@ -1,4 +1,6 @@
 cask "zed-linux" do
+  os linux: "linux"
+
   version "1.20.2"
   sha256 "647dc85e09fcd99cd175365a89b7b70ccf96469c4844eb8ae6eb83dfa82f7600"
 
@@ -11,6 +13,9 @@ cask "zed-linux" do
     url "https://github.com/zed-industries/zed/releases"
     strategy :github_releases
   end
+
+  depends_on arch: :x86_64
+  depends_on :linux
 
   binary "zed.app/bin/zed"
 

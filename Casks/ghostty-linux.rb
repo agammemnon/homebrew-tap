@@ -1,4 +1,6 @@
 cask "ghostty-linux" do
+  os linux: "linux"
+
   version "1.3.1"
   sha256 "fde48d2b716afd1978766879bbf1aae30dd305e8ad86a1037a2614a14d82dc28"
 
@@ -12,7 +14,9 @@ cask "ghostty-linux" do
     strategy :github_latest
   end
 
+  depends_on arch: :x86_64
   depends_on formula: "squashfs"
+  depends_on :linux
 
   binary "ghostty-wrapper", target: "ghostty"
 

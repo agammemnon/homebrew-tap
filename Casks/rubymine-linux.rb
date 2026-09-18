@@ -26,6 +26,7 @@ cask "rubymine-linux" do
 
   auto_updates false
   conflicts_with cask: "jetbrains-toolbox-linux"
+  depends_on :linux
 
   binary "rubymine/bin/rubymine"
   artifact "jetbrains-rubymine.desktop",

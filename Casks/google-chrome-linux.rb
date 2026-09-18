@@ -1,4 +1,6 @@
 cask "google-chrome-linux" do
+  os linux: "linux"
+
   version "153.0.8010.47"
   sha256 :no_check
 
@@ -13,6 +15,9 @@ cask "google-chrome-linux" do
       json["versions"]&.first&.dig("version")
     end
   end
+
+  depends_on arch: :x86_64
+  depends_on :linux
 
   binary "#{staged_path}/chrome-extracted/opt/google/chrome/google-chrome", target: "google-chrome"
 

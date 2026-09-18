@@ -26,6 +26,7 @@ cask "intellij-idea-linux" do
 
   auto_updates false
   conflicts_with cask: "jetbrains-toolbox-linux"
+  depends_on :linux
 
   binary "idea/bin/idea"
   artifact "jetbrains-idea.desktop",

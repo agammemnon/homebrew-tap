@@ -1,4 +1,6 @@
 cask "docker-desktop-linux" do
+  os linux: "linux"
+
   version "4.91.0"
   sha256 :no_check
 
@@ -11,6 +13,9 @@ cask "docker-desktop-linux" do
     url "https://desktop.docker.com/linux/main/amd64/appcast.xml"
     strategy :sparkle, &:short_version
   end
+
+  depends_on arch: :x86_64
+  depends_on :linux
 
   binary "#{staged_path}/dd-extracted/opt/docker-desktop/bin/docker-desktop", target: "docker-desktop"
   artifact "docker-desktop.desktop",

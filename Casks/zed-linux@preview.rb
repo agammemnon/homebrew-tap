@@ -1,4 +1,6 @@
 cask "zed-linux@preview" do
+  os linux: "linux"
+
   version "1.21.0-pre"
   sha256 "eadc30098196a0a212988a5ea4d193e78641e17b459e4275ddd7675175449b44"
 
@@ -13,6 +15,9 @@ cask "zed-linux@preview" do
       all_headers.filter_map { |h| h["location"]&.match(%r{/download/v([^/]+-pre)/})&.[](1) }.first
     end
   end
+
+  depends_on arch: :x86_64
+  depends_on :linux
 
   binary "zed-preview.app/bin/zed", target: "zed-preview"
 

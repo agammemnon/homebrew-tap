@@ -1,4 +1,6 @@
 cask "zen-browser-linux" do
+  os linux: "linux"
+
   version "1.22.2"
   sha256 "163823cf56b068e81bb8a48d93c9dbda3993f54f03f8d37e684e380bfc11b892"
 
@@ -11,6 +13,9 @@ cask "zen-browser-linux" do
     url "https://github.com/zen-browser/desktop/releases"
     strategy :github_releases
   end
+
+  depends_on arch: :x86_64
+  depends_on :linux
 
   binary "zen-wrapper", target: "zen"
 

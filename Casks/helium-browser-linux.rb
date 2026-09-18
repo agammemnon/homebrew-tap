@@ -1,4 +1,6 @@
 cask "helium-browser-linux" do
+  os linux: "linux"
+
   version "0.17.1.1"
   sha256 "686d3bd83330669d7da8036648c5a251562b3963b624da19d5e9f568ddd65930"
 
@@ -11,6 +13,9 @@ cask "helium-browser-linux" do
     url :url
     strategy :github_latest
   end
+
+  depends_on arch: :x86_64
+  depends_on :linux
 
   binary "helium-#{version}-x86_64_linux/helium", target: "helium"
 

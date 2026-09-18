@@ -12,9 +12,17 @@ cask "zen-browser-linux" do
     strategy :github_releases
   end
 
-  binary "zen/zen"
+  binary "zen-wrapper", target: "zen"
 
   preflight_steps do
+    # Caskroom paths change on upgrades; use one default profile across installs.
+    write_file "zen-wrapper", <<~SH
+      #!/bin/sh
+      export MOZ_LEGACY_PROFILES=1
+      exec "{{staged_path}}/zen/zen" "$@"
+    SH
+    set_permissions "zen-wrapper", "0755"
+
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons", base: :home
   end
@@ -45,4 +53,12 @@ cask "zen-browser-linux" do
     "#{Dir.home}/.cache/zen",
     "#{Dir.home}/.zen",
   ]
+
+  caveats <<~EOS
+    Zen uses a shared default profile so Caskroom version changes do not select a new profile.
+    Existing users may need to select their previous profile once:
+      Quit Zen completely, run `zen -P`, select your previous profile, and enable
+      "Use the selected profile without asking at startup" before starting Zen.
+    Installing this launcher does not modify or remove existing profiles.
+  EOS
 end

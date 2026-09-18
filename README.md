@@ -107,6 +107,34 @@ Run `brew info <package-name>` to view detailed post-install instructions.
 
 ## Troubleshooting
 
+### Zen Opens Onboarding After an Upgrade
+
+Zen normally chooses a default profile based on its installation directory. Homebrew's
+versioned Caskroom paths can therefore make an upgrade look like a new installation.
+The cask's `zen` launcher sets `MOZ_LEGACY_PROFILES=1` for Zen only, using a shared
+default profile across upgrades for both terminal and desktop launches.
+
+If you already have multiple profiles, switching to this launcher may initially select
+a different default. After installing the updated cask:
+
+1. Quit Zen completely and back up your Zen profile directory (normally `~/.config/zen`).
+2. Run `zen -P` to open the profile manager.
+3. Select your original profile, enable **Use the selected profile without asking at startup**,
+   and start Zen. Profile names vary; do not assume the newest profile contains your data.
+4. Verify your history and bookmarks, then quit and reopen Zen normally to confirm the selection persists.
+
+The cask does not migrate or delete profiles when installing this launcher. Keep your
+other profiles until you have verified recovery. Explicit `-P` and `--profile` arguments
+remain available. This setting also shares the legacy default with other Zen installations
+using the same profile directory; it does not disable downgrade protection.
+
+A launcher-only cask change does not bump Zen's upstream version. To apply it without
+waiting for the next version upgrade, reinstall the cask once the fix is available:
+
+```bash
+brew reinstall --cask agammemnon/tap/zen-browser-linux
+```
+
 ### GSettings Schema Errors
 
 If you encounter GSettings-related errors with foundry, ensure you've compiled the schemas:

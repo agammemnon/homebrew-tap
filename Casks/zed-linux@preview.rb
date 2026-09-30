@@ -27,14 +27,13 @@ cask "zed-linux@preview" do
   end
 
   postflight_steps do
-    copy "zed-preview.app/share/applications/dev.zed.Zed-Preview.desktop",
-         ".local/share/applications/dev.zed.Zed-Preview.desktop", target_base: :home
-    inreplace ".local/share/applications/dev.zed.Zed-Preview.desktop", /^TryExec=.*/,
-              "TryExec={{HOMEBREW_PREFIX}}/bin/zed-preview", base: :home, audit_result: false
-    inreplace ".local/share/applications/dev.zed.Zed-Preview.desktop", /^Exec=zed/,
-              "Exec={{HOMEBREW_PREFIX}}/bin/zed-preview", base: :home, audit_result: false
-    inreplace ".local/share/applications/dev.zed.Zed-Preview.desktop", /^Icon=.*/, "Icon=zed-preview",
-              base: :home, audit_result: false
+    # Prepare the launcher in staging to avoid in-place edits in the sandboxed home directory.
+    run "/bin/sed", args:        ["-e", "s|^TryExec=.*|TryExec={{HOMEBREW_PREFIX}}/bin/zed-preview|",
+                                  "-e", "s|^Exec=zed|Exec={{HOMEBREW_PREFIX}}/bin/zed-preview|",
+                                  "-e", "s|^Icon=.*|Icon=zed-preview|",
+                                  "{{staged_path}}/zed-preview.app/share/applications/dev.zed.Zed-Preview.desktop"],
+                    stdout_path: "dev.zed.Zed-Preview.desktop"
+    copy "dev.zed.Zed-Preview.desktop", ".local/share/applications/dev.zed.Zed-Preview.desktop", target_base: :home
     copy "zed-preview.app/share/icons/hicolor/512x512/apps/zed.png",
          ".local/share/icons/zed-preview.png", target_base: :home
   end

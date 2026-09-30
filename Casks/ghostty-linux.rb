@@ -29,7 +29,7 @@ cask "ghostty-linux" do
 
     mkdir_p ".local/share/applications", base: :home
     mkdir_p ".local/share/icons", base: :home
-    mkdir_p ".local/share/systemd/user", base: :home
+    mkdir_p ".local/share/dbus-1/services", base: :home
 
     # AppRun uses its own directory to find resources, so keep the wrapper.
     write_file "ghostty-wrapper", <<~SH
@@ -40,21 +40,30 @@ cask "ghostty-linux" do
   end
 
   postflight_steps do
-    copy "squashfs-root/com.mitchellh.ghostty.desktop", ".local/share/applications/ghostty.desktop",
+    # Prepare files in staging; the desktop ID must match the D-Bus activation name.
+    run "/bin/sed", args:        ["-e", "s|^TryExec=.*|TryExec={{HOMEBREW_PREFIX}}/bin/ghostty|",
+                                  "-e", "s|^Exec=[^ ]*|Exec={{HOMEBREW_PREFIX}}/bin/ghostty|",
+                                  "-e", "s|^Icon=.*|Icon=ghostty|",
+                                  "{{staged_path}}/squashfs-root/com.mitchellh.ghostty.desktop"],
+                    stdout_path: "com.mitchellh.ghostty.desktop"
+    copy "com.mitchellh.ghostty.desktop", ".local/share/applications/com.mitchellh.ghostty.desktop",
          target_base: :home
-    inreplace ".local/share/applications/ghostty.desktop", /^TryExec=.*/,
-              "TryExec={{HOMEBREW_PREFIX}}/bin/ghostty", base: :home, audit_result: false
-    inreplace ".local/share/applications/ghostty.desktop", /^Exec=.*/,
-              "Exec={{HOMEBREW_PREFIX}}/bin/ghostty", base: :home, audit_result: false
     copy "squashfs-root/com.mitchellh.ghostty.png", ".local/share/icons/ghostty.png", target_base: :home
-    copy "squashfs-root/share/dbus-1/services/com.mitchellh.ghostty.service",
-         ".local/share/systemd/user/com.mitchellh.ghostty.service", target_base: :home
+
+    # Use direct D-Bus activation rather than referring to a systemd unit we do not install.
+    run "/bin/sed", args: [
+      "-e", "/^SystemdService=/d",
+      "-e", "s|^Exec=[^ ]*|Exec={{HOMEBREW_PREFIX}}/bin/ghostty|",
+      "{{staged_path}}/squashfs-root/share/dbus-1/services/com.mitchellh.ghostty.service"
+    ], stdout_path: "com.mitchellh.ghostty.service"
+    copy "com.mitchellh.ghostty.service", ".local/share/dbus-1/services/com.mitchellh.ghostty.service",
+         target_base: :home
   end
 
   uninstall_postflight_steps do
-    remove ".local/share/applications/ghostty.desktop", base: :home
+    remove ".local/share/applications/com.mitchellh.ghostty.desktop", base: :home
     remove ".local/share/icons/ghostty.png", base: :home
-    remove ".local/share/systemd/user/com.mitchellh.ghostty.service", base: :home
+    remove ".local/share/dbus-1/services/com.mitchellh.ghostty.service", base: :home
   end
 
   zap trash: "~/.config/ghostty"

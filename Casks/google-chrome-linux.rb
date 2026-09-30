@@ -17,25 +17,30 @@ cask "google-chrome-linux" do
   end
 
   depends_on arch: :x86_64
+  depends_on formula: "cpio"
+  depends_on formula: "rpm2cpio"
   depends_on :linux
 
   binary "#{staged_path}/chrome-extracted/opt/google/chrome/google-chrome", target: "google-chrome"
 
   preflight_steps do
     mkdir_p "chrome-extracted"
-    run "rpm2cpio", args:        ["{{staged_path}}/google-chrome-stable_current_x86_64.rpm"],
-                    stdout_path: "google-chrome.cpio"
-    run "cpio", args: ["-idmv"],
-                stdin_path: "google-chrome.cpio", chdir: "chrome-extracted"
+    run "{{HOMEBREW_PREFIX}}/opt/rpm2cpio/bin/rpm2cpio",
+        args:        ["{{staged_path}}/google-chrome-stable_current_x86_64.rpm"],
+        stdout_path: "google-chrome.cpio"
+    run "{{HOMEBREW_PREFIX}}/opt/cpio/bin/cpio", args: ["-idmv"],
+                                             stdin_path: "google-chrome.cpio", chdir: "chrome-extracted"
     remove ["google-chrome-stable_current_x86_64.rpm", "google-chrome.cpio"]
 
     mkdir_p ".local/share/applications", base: :home
 
     if_path_exists "chrome-extracted/usr/share/applications/google-chrome.desktop" do
-      copy "chrome-extracted/usr/share/applications/google-chrome.desktop",
-           ".local/share/applications/google-chrome.desktop", target_base: :home
-      inreplace ".local/share/applications/google-chrome.desktop", /^Exec=.*/,
-                "Exec={{HOMEBREW_PREFIX}}/bin/google-chrome %U", base: :home, audit_result: false
+      # Edit in staging, preserving arguments for desktop actions such as incognito.
+      run "/bin/sed", args:        ["-e", "s|^Exec=[^ ]*|Exec={{HOMEBREW_PREFIX}}/bin/google-chrome|",
+                                    "-e", "s|^TryExec=.*|TryExec={{HOMEBREW_PREFIX}}/bin/google-chrome|",
+                                    "{{staged_path}}/chrome-extracted/usr/share/applications/google-chrome.desktop"],
+                      stdout_path: "google-chrome.desktop"
+      copy "google-chrome.desktop", ".local/share/applications/google-chrome.desktop", target_base: :home
     end
     unless_path_exists "chrome-extracted/usr/share/applications/google-chrome.desktop" do
       write_file ".local/share/applications/google-chrome.desktop", <<~EOS, base: :home

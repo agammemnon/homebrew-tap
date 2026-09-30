@@ -15,6 +15,8 @@ cask "docker-desktop-linux" do
   end
 
   depends_on arch: :x86_64
+  depends_on formula: "cpio"
+  depends_on formula: "rpm2cpio"
   depends_on :linux
 
   binary "#{staged_path}/dd-extracted/opt/docker-desktop/bin/docker-desktop", target: "docker-desktop"
@@ -26,10 +28,11 @@ cask "docker-desktop-linux" do
   preflight_steps do
     # Keep extraction declarative and stop if either command fails.
     mkdir_p "dd-extracted"
-    run "rpm2cpio", args:        ["{{staged_path}}/docker-desktop-x86_64.rpm"],
-                    stdout_path: "docker-desktop.cpio"
-    run "cpio", args: ["-idmv"],
-                stdin_path: "docker-desktop.cpio", chdir: "dd-extracted"
+    run "{{HOMEBREW_PREFIX}}/opt/rpm2cpio/bin/rpm2cpio",
+        args:        ["{{staged_path}}/docker-desktop-x86_64.rpm"],
+        stdout_path: "docker-desktop.cpio"
+    run "{{HOMEBREW_PREFIX}}/opt/cpio/bin/cpio", args: ["-idmv"],
+                                             stdin_path: "docker-desktop.cpio", chdir: "dd-extracted"
     remove ["docker-desktop-x86_64.rpm", "docker-desktop.cpio"]
 
     mkdir_p ".local/share/applications", base: :home
@@ -48,11 +51,12 @@ cask "docker-desktop-linux" do
 
     mkdir_p ".config/systemd/user", base: :home
     if_path_exists "dd-extracted/usr/lib/systemd/user/docker-desktop.service" do
-      copy "dd-extracted/usr/lib/systemd/user/docker-desktop.service",
-           ".config/systemd/user/docker-desktop.service", target_base: :home
-      inreplace ".config/systemd/user/docker-desktop.service", /^ExecStart=.*/,
-                "ExecStart={{staged_path}}/dd-extracted/opt/docker-desktop/bin/com.docker.backend",
-                base: :home, audit_result: false
+      # Prepare the unit in staging before copying it into the sandboxed home directory.
+      run "/bin/sed", args: [
+        "-e", "s|^ExecStart=[^ ]*|ExecStart={{staged_path}}/dd-extracted/opt/docker-desktop/bin/com.docker.backend|",
+        "{{staged_path}}/dd-extracted/usr/lib/systemd/user/docker-desktop.service"
+      ], stdout_path: "docker-desktop.service"
+      copy "docker-desktop.service", ".config/systemd/user/docker-desktop.service", target_base: :home
     end
 
     mkdir_p ".docker/cli-plugins", base: :home

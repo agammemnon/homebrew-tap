@@ -25,14 +25,13 @@ cask "zed-linux" do
   end
 
   postflight_steps do
-    copy "zed.app/share/applications/dev.zed.Zed.desktop",
-         ".local/share/applications/dev.zed.Zed.desktop", target_base: :home
-    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^TryExec=.*/,
-              "TryExec={{HOMEBREW_PREFIX}}/bin/zed", base: :home, audit_result: false
-    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^Exec=zed/,
-              "Exec={{HOMEBREW_PREFIX}}/bin/zed", base: :home, audit_result: false
-    inreplace ".local/share/applications/dev.zed.Zed.desktop", /^Icon=.*/, "Icon=zed",
-              base: :home, audit_result: false
+    # Prepare the launcher in staging to avoid in-place edits in the sandboxed home directory.
+    run "/bin/sed", args:        ["-e", "s|^TryExec=.*|TryExec={{HOMEBREW_PREFIX}}/bin/zed|",
+                                  "-e", "s|^Exec=zed|Exec={{HOMEBREW_PREFIX}}/bin/zed|",
+                                  "-e", "s|^Icon=.*|Icon=zed|",
+                                  "{{staged_path}}/zed.app/share/applications/dev.zed.Zed.desktop"],
+                    stdout_path: "dev.zed.Zed.desktop"
+    copy "dev.zed.Zed.desktop", ".local/share/applications/dev.zed.Zed.desktop", target_base: :home
     copy "zed.app/share/icons/hicolor/512x512/apps/zed.png", ".local/share/icons/zed.png", target_base: :home
   end
 

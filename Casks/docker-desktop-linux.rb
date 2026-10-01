@@ -43,10 +43,10 @@ cask "docker-desktop-linux" do
     end
 
     if_path_exists "dd-extracted/usr/share/applications/docker-desktop.desktop" do
-      copy "dd-extracted/usr/share/applications/docker-desktop.desktop", "docker-desktop.desktop"
-      inreplace "docker-desktop.desktop", /^Exec=.*/, "Exec={{HOMEBREW_PREFIX}}/bin/docker-desktop",
-                audit_result: false
-      inreplace "docker-desktop.desktop", /^Icon=.*/, "Icon=docker-desktop", audit_result: false
+      run "/bin/sed", args:        ["-e", "s|^Exec=.*|Exec={{HOMEBREW_PREFIX}}/bin/docker-desktop|",
+                                    "-e", "s|^Icon=.*|Icon=docker-desktop|",
+                                    "{{staged_path}}/dd-extracted/usr/share/applications/docker-desktop.desktop"],
+                      stdout_path: "docker-desktop.desktop"
     end
 
     mkdir_p ".config/systemd/user", base: :home

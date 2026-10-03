@@ -26,12 +26,19 @@ cask "delta-linux" do
   binary "Delta/bin/delta"
   artifact "dev.zed.Delta.desktop",
            target: "#{Dir.home}/.local/share/applications/dev.zed.Delta.desktop"
+  # Install straight into ~/.local/share/icons instead of a themed size directory.
+  # GTK resolves names here through its search-path fallback without reading
+  # hicolor's icon-theme.cache, so the launcher icon cannot go blank when that
+  # cache is stale (a themed icon added after the cache was built is invisible
+  # until something runs `gtk-update-icon-cache`). zed-linux relies on the same
+  # behaviour for `Icon=zed`. Upstream's desktop file uses `Icon=dev.zed.Delta`,
+  # so the installed filename has to match that name.
   artifact "dev.zed.Delta.png",
-           target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/dev.zed.Delta.png"
+           target: "#{Dir.home}/.local/share/icons/dev.zed.Delta.png"
 
   preflight_steps do
     mkdir_p ".local/share/applications", base: :home
-    mkdir_p ".local/share/icons/hicolor/512x512/apps", base: :home
+    mkdir_p ".local/share/icons", base: :home
 
     # Edit in staging rather than in the sandboxed home directory. Upstream launches the
     # app through the CLI, so keep the arguments after the binary (`%U`) intact.
@@ -44,7 +51,7 @@ cask "delta-linux" do
 
   uninstall_postflight_steps do
     remove ".local/share/applications/dev.zed.Delta.desktop", base: :home
-    remove ".local/share/icons/hicolor/512x512/apps/dev.zed.Delta.png", base: :home
+    remove ".local/share/icons/dev.zed.Delta.png", base: :home
   end
 
   zap trash: [

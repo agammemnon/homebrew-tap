@@ -1,7 +1,7 @@
 class Bcvk < Formula
   desc "CLI tool for launching ephemeral VMs from bootc container images"
   homepage "https://github.com/bootc-dev/bcvk"
-  url "https://github.com/bootc-dev/bcvk.git", tag: "v0.20.0", revision: "aaa917ae82086a68941fbb84678b03fe13526093"
+  url "https://github.com/bootc-dev/bcvk.git", tag: "v0.21.0", revision: "3292e7a9836a3bd5f04e5912e846d1198c6c9b25"
   license any_of: ["Apache-2.0", "MIT"]
 
   livecheck do

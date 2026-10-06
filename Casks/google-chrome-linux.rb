@@ -1,7 +1,7 @@
 cask "google-chrome-linux" do
   os linux: "linux"
 
-  version "154.0.8037.97"
+  version "155.0.8059.39"
   sha256 :no_check
 
   url "https://dl.google.com/linux/direct/google-chrome-stable_current_x86_64.rpm"

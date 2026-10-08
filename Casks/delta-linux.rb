@@ -2,9 +2,9 @@ cask "delta-linux" do
   arch arm: "aarch64", intel: "x86_64"
   os linux: "linux"
 
-  version "0.18.2"
-  sha256 arm64_linux:  "208719d69c57eb4d646ca1a47be6ce7cdad4d122b9e18d531f6bff3c29f5a38d",
-         x86_64_linux: "9852daef61eb259f1f4f19638bf5f0c9f0323382827ee17e746df93ee5ed4f14"
+  version "0.19.0"
+  sha256 arm64_linux:  "7b3c76f73336b9b7b1eb5aa9239ed2cf9b68ef91491e0911560c17a53f9a393b",
+         x86_64_linux: "e2c329190914b170e6ae8b3ba4091c4ced90a208a36105ef6489c1622ded4670"
 
   # delta.dev only serves short-lived signed URLs from a private bucket, so this
   # downloads the same binary from Zed's public delta-nix release mirror instead.

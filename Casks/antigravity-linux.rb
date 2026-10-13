@@ -30,6 +30,8 @@ cask "antigravity-linux" do
   zsh_completion  "Antigravity/resources/completions/zsh/_antigravity-ide"
   artifact "antigravity.desktop",
            target: "#{Dir.home}/.local/share/applications/antigravity.desktop"
+  artifact "antigravity-url-handler.desktop",
+           target: "#{Dir.home}/.local/share/applications/antigravity-url-handler.desktop"
   artifact "antigravity.png",
            target: "#{Dir.home}/.local/share/icons/hicolor/512x512/apps/antigravity.png"
 
@@ -51,7 +53,7 @@ cask "antigravity-linux" do
       StartupNotify=false
       StartupWMClass=Antigravity IDE
       Categories=TextEditor;Development;IDE;
-      MimeType=text/plain;inode/directory;application/x-code-workspace;
+      MimeType=text/plain;inode/directory;application/x-code-workspace;x-scheme-handler/antigravity-ide;
       Actions=new-empty-window;
       Keywords=antigravity;code;editor;ai;
 
@@ -60,13 +62,52 @@ cask "antigravity-linux" do
       Exec={{HOMEBREW_PREFIX}}/bin/antigravity --new-window %F
       Icon=antigravity
     EOS
+
+    # Sign-in returns to the IDE through its `antigravity-ide://` URL scheme
+    # (`urlProtocol` in product.json), which needs its own hidden launcher.
+    write_file "antigravity-url-handler.desktop", <<~EOS
+      [Desktop Entry]
+      Name=Antigravity IDE - URL Handler
+      Comment=AI Coding Agent IDE
+      GenericName=Text Editor
+      Exec={{HOMEBREW_PREFIX}}/bin/antigravity --open-url %U
+      Icon=antigravity
+      Type=Application
+      NoDisplay=true
+      Terminal=false
+      StartupNotify=true
+      StartupWMClass=Antigravity IDE
+      Categories=Utility;TextEditor;Development;IDE;
+      MimeType=x-scheme-handler/antigravity-ide;
+      Keywords=antigravity;code;editor;ai;
+    EOS
+  end
+
+  # GIO trusts mimeinfo.cache when one exists, so refresh it or the scheme handler stays
+  # invisible to browsers until something else rebuilds the cache. Steps cannot expand
+  # the home directory in arguments, so reach it through a staged symlink.
+  postflight_steps do
+    symlink ".local/share/applications", "user-applications", source_base: :home, overwrite: true
+    run "/usr/bin/update-desktop-database", args:           ["{{staged_path}}/user-applications"],
+                                            must_succeed:   false,
+                                            writable_paths: [".local/share/applications"], writable_base: :home
+  end
+
+  uninstall_postflight_steps do
+    symlink ".local/share/applications", "user-applications", source_base: :home, overwrite: true
+    run "/usr/bin/update-desktop-database", args:           ["{{staged_path}}/user-applications"],
+                                            must_succeed:   false,
+                                            writable_paths: [".local/share/applications"], writable_base: :home
   end
 
   zap trash: [
     "~/.antigravity",
     "~/.antigravity-ide",
+    "~/.antigravity-ide-server",
     "~/.config/Antigravity IDE",
     "~/.config/Antigravity",
+    "~/.config/antigravity-ide",
+    "~/.gemini/antigravity-ide",
   ]
 
   caveats <<~EOS

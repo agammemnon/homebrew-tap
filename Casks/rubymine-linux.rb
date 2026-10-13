@@ -36,6 +36,9 @@ cask "rubymine-linux" do
 
   preflight_steps do
     # Normalise the versioned directory before referring to it in declarative steps.
+    # The Linux sandbox pre-creates the parent of every path a later step writes
+    # (here rubymine/bin), so clear that placeholder or the move nests the IDE inside it.
+    remove "rubymine", recursive: true
     move "RubyMine-*", "rubymine", source_glob: true
     touch "rubymine/bin/rubymine64.vmoptions"
     inreplace "rubymine/bin/rubymine64.vmoptions", /\z/, "-Dide.no.platform.update=true\n"

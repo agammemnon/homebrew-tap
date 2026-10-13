@@ -36,6 +36,9 @@ cask "goland-linux" do
 
   preflight_steps do
     # Normalise the versioned directory before referring to it in declarative steps.
+    # The Linux sandbox pre-creates the parent of every path a later step writes
+    # (here goland/bin), so clear that placeholder or the move nests the IDE inside it.
+    remove "goland", recursive: true
     move "GoLand-*", "goland", source_glob: true
     touch "goland/bin/goland64.vmoptions"
     inreplace "goland/bin/goland64.vmoptions", /\z/, "-Dide.no.platform.update=true\n"

@@ -36,6 +36,9 @@ cask "intellij-idea-linux" do
 
   preflight_steps do
     # Normalise the versioned directory before referring to it in declarative steps.
+    # The Linux sandbox pre-creates the parent of every path a later step writes
+    # (here idea/bin), so clear that placeholder or the move nests the IDE inside it.
+    remove "idea", recursive: true
     move "idea-IU-*", "idea", source_glob: true
     touch "idea/bin/idea64.vmoptions"
     inreplace "idea/bin/idea64.vmoptions", /\z/, "-Dide.no.platform.update=true\n"

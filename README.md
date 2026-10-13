@@ -61,6 +61,11 @@ Casks provide pre-built GUI applications with desktop integration.
   brew install --cask agammemnon/tap/zed-linux
   ```
 
+- **godot-linux** - Multi-platform 2D and 3D game engine with a feature-rich editor
+  ```bash
+  brew install --cask agammemnon/tap/godot-linux
+  ```
+
 #### macOS Apps
 
 - **peekcal** - Menu bar view of a shared Google Calendar work week (Apple silicon)

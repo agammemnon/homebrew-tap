@@ -47,6 +47,15 @@ cask "zen-browser-linux" do
       StartupWMClass=zen
     EOS
     copy "zen/browser/chrome/icons/default/default128.png", ".local/share/icons/zen.png", target_base: :home
+
+    # 1Password verifies browser ownership; reapply it to each upgraded payload.
+    set_ownership "zen", user: "root", group: "root", recursive: true
+  end
+
+  uninstall_preflight_steps do
+    # Restore ownership so Homebrew can remove the payload during upgrades too.
+    # An empty group makes chown select the current user's login group.
+    set_ownership "zen", group: "", recursive: true
   end
 
   uninstall_postflight_steps do
@@ -60,6 +69,12 @@ cask "zen-browser-linux" do
   ]
 
   caveats <<~EOS
+    Zen's application files are root-owned for 1Password browser verification.
+    Installation, upgrades and removal may require sudo. Update Zen with Homebrew,
+    not its built-in updater. Your browser profile remains user-owned.
+    To enable 1Password integration, add zen to /etc/1password/custom_allowed_browsers
+    and fully restart both apps. This cask does not change 1Password's allowlist.
+
     Zen uses a shared default profile so Caskroom version changes do not select a new profile.
     Existing users may need to select their previous profile once:
       Quit Zen completely, run `zen -P`, select your previous profile, and enable

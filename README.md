@@ -140,6 +140,28 @@ waiting for the next version upgrade, reinstall the cask once the fix is availab
 brew reinstall --cask agammemnon/tap/zen-browser-linux
 ```
 
+### Zen Cannot Connect to the 1Password Desktop App
+
+1Password checks browser ownership on Linux. A user-owned Zen executable can fail
+with `BrowserProcessVerification(BinaryPermissions)`, even when `zen` is already
+in `/etc/1password/custom_allowed_browsers`.
+
+The cask makes Zen's application directory and its contents root-owned on every
+install and upgrade. It restores user ownership before removal so Homebrew can
+clean up the old version. This does not change your profile or the Linuxbrew prefix.
+Installation, upgrades and removal may prompt for sudo. Use Homebrew to update Zen,
+not the browser's built-in updater.
+
+To apply this cask change without waiting for a new Zen version, quit Zen and run:
+
+```bash
+brew reinstall --cask agammemnon/tap/zen-browser-linux
+```
+
+If needed, follow [1Password's additional-browser instructions](https://support.1password.com/additional-browsers/)
+to add `zen` to `/etc/1password/custom_allowed_browsers`, then fully restart both apps.
+The cask deliberately leaves this trust decision and the existing allowlist unchanged.
+
 ### GSettings Schema Errors
 
 If you encounter GSettings-related errors with foundry, ensure you've compiled the schemas:

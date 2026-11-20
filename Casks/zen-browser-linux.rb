@@ -54,8 +54,9 @@ cask "zen-browser-linux" do
 
   uninstall_preflight_steps do
     # Restore ownership so Homebrew can remove the payload during upgrades too.
-    # An empty group makes chown select the current user's login group.
-    set_ownership "zen", group: "", recursive: true
+    # Use chown directly: Homebrew drops an empty set_ownership group and defaults to staff.
+    # A trailing colon selects the current user's login group on Linux.
+    run "/usr/bin/chown", args: ["-R", "--", "{{user}}:", "{{staged_path}}/zen"], sudo: true
   end
 
   uninstall_postflight_steps do
